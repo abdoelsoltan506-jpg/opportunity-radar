@@ -1,64 +1,115 @@
-﻿<!DOCTYPE html>
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radar Enterprise V6 - Optimized</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        #analysis-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 99999; align-items: center; justify-content: center; }
-        .gauge-container { position: relative; width: 180px; height: 90px; overflow: hidden; margin: 20px auto; }
-        .gauge-background { width: 100%; height: 100%; background: conic-gradient(from -90deg at 50% 100%, #f85149, #d29922, #238636); border-radius: 180px 180px 0 0; }
-        .gauge-cover { position: absolute; top: 10px; left: 10px; width: 160px; height: 80px; background: #161b22; border-radius: 160px 160px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px;}
-        .gauge-needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 80px; background: #fff; transform-origin: bottom center; transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        :root { --bg: #0d1117; --panel: #161b22; --accent: #58a6ff; --gold: #d29922; --green: #238636; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #c9d1d9; margin:0; }
-        header { background: var(--panel); padding:10px 5%; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000; }
-        .sys-window { background:#562d19; border:1px solid var(--accent); width:450px; height:150px; overflow:hidden; position:relative; border-radius:4px; }
-        .ticker { position:absolute; white-space:nowrap; color:#f11197; font-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; animation:scroll-right 40s linear infinite; }
-        @keyframes scroll-right { 0%{left:-100%;} 100%{left:100%;} }
-        main { display:flex; gap:20px; padding:20px; max-width:1600px; margin:auto; }
-        .sidebar { width:280px; flex-shrink:0; }
-        .console-box { background:var(--panel); border:1px solid #30363d; padding:20px; border-radius:10px; position:sticky; top:80px; }
-        label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
-        select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--accent); border-radius:6px; }
-        .execute-btn { width:100%; background:var(--gold); color:#000; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
-        .card { background:var(--panel); border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
-        .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
-        .desc-box { background:#0d1117; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
-        .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:15px; }
-        .stat-item { background:#21262d; padding:15px; border-radius:8px; text-align:center; border:1px solid #30363d; }
-        .stat-label { color:var(--accent); font-size:0.8rem; display:block; margin-bottom:5px; }
-        .loading { text-align:center; padding:100px; font-size:1.2rem; color:var(--gold); }
-        .status-indicator { display:inline-flex; align-items:center; gap:8px; background:#000; padding:5px 12px; border-radius:20px; border:1px solid #333; margin-top:5px; }
-        .led-red { width:10px; height:10px; background-color:#f85149; border-radius:50%; box-shadow:0 0 10px #f85149; animation:blink-red 1s infinite; }
-        .led-green { width:10px; height:10px; background-color:#238636; border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 2s infinite; }
-        @keyframes blink-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-        @keyframes pulse-green { 0%{box-shadow:0 0 0 0 rgba(35,134,54,0.7);} 70%{box-shadow:0 0 0 10px rgba(35,134,54,0);} 100%{box-shadow:0 0 0 0 rgba(35,134,54,0);} }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar Enterprise V6 - Optimized</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* 1. نافذة التحليل (مخفية افتراضياً) */
+#analysis-modal {
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(0, 0, 0, 0.9); 
+    z-index: 99999; 
+    align-items: center; 
+    justify-content: center;
+}
+
+/* 2. حاوية العداد (نصف الدائرة) */
+.gauge-container { 
+    position: relative; 
+    width: 180px; height: 90px; 
+    overflow: hidden; 
+    margin: 20px auto; 
+}
+
+.gauge-background { 
+    width: 100%; height: 100%; 
+    background: conic-gradient(from -90deg at 50% 100%, #f85149, #d29922, #238636); 
+    border-radius: 180px 180px 0 0; 
+}
+
+.gauge-cover { 
+    position: absolute; top: 10px; left: 10px; width: 160px; height: 80px; 
+    background: #161b22; border-radius: 160px 160px 0 0; 
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px;
+}
+
+.gauge-needle { 
+    position: absolute; bottom: 0; left: 50%; width: 3px; height: 80px; 
+    background: #fff; transform-origin: bottom center; 
+    transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+    :root {
+        --bg: #0d1117; --panel: #161b22; --accent: #58a6ff;
+        --gold: #d29922; --green: #238636;
+    }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #c9d1d9; margin:0; }
+    header { background: var(--panel); padding:10px 5%; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000; }
+    .sys-window { background:#562d19; border:1px solid var(--accent); width:450px; height:150px; overflow:hidden; position:relative; border-radius:4px; }
+    .ticker { position:absolute; white-space:nowrap; color:#f11197; font-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; animation:scroll-right 40s linear infinite; }
+    @keyframes scroll-right { 0%{left:-100%;} 100%{left:100%;} }
+    main { display:flex; gap:20px; padding:20px; max-width:1600px; margin:auto; }
+    .sidebar { width:280px; flex-shrink:0; }
+    .console-box { background:var(--panel); border:1px solid #30363d; padding:20px; border-radius:10px; position:sticky; top:80px; }
+    label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
+    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--accent); border-radius:6px; }
+    .execute-btn { width:100%; background:var(--gold); color:#000; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
+    .card { background:var(--panel); border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
+    .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
+    .desc-box { background:#0d1117; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; }
+    .stat-item { background:#21262d; padding:15px; border-radius:8px; text-align:center; border:1px solid #30363d; }
+    .stat-label { color:var(--accent); font-size:0.8rem; display:block; margin-bottom:5px; }
+    .score-bar-bg { background:#30363d; height:12px; border-radius:10px; margin-top:20px; overflow:hidden; }
+    .score-bar-fill { height:100%; transition:width 1s; }
+    .loading { text-align:center; padding:100px; font-size:1.2rem; color:var(--gold); }
+
+    /* --- لمبة الحالة --- */
+    .status-indicator { display:inline-flex; align-items:center; gap:8px; background:#000; padding:5px 12px; border-radius:20px; border:1px solid #333; margin-top:5px; }
+    .led-red { width:10px; height:10px; background-color:#f85149; border-radius:50%; box-shadow:0 0 10px #f85149; animation:blink-red 1s infinite; }
+    .led-green { width:10px; height:10px; background-color:#238636; border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 2s infinite; }
+    @keyframes blink-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    @keyframes pulse-green { 0%{box-shadow:0 0 0 0 rgba(35,134,54,0.7);} 70%{box-shadow:0 0 0 10px rgba(35,134,54,0);} 100%{box-shadow:0 0 0 0 rgba(35,134,54,0);} }
+</style>
 </head>
 <body>
 <div id="analysis-modal">
     <div style="background:#161b22; width:90%; max-width:450px; padding:30px; border-radius:15px; border:2px solid #d29922; text-align:center; position:relative;">
+        
         <button onclick="closeAnalysis()" style="position:absolute; top:10px; left:10px; background:none; border:none; color:#888; cursor:pointer; font-size:1.2rem;">✕</button>
+        
         <h2 id="modal-title" style="color:#58a6ff; margin-bottom:10px;">--</h2>
+        
         <div class="gauge-container">
-            <div class="gauge-background"></div>
-            <div class="gauge-cover">
-                <span id="modal-score" style="font-size:1.8rem; font-weight:800; color:#fff;">0%</span>
-            </div>
-            <div id="modal-needle" class="gauge-needle"></div>
-        </div>
-        <div style="height: 200px; width: 100%; margin: 20px 0;">
-            <canvas id="opportunityChart"></canvas>
-        </div>
-        <div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+    <div class="gauge-background"></div>
+    <div class="gauge-cover">
+        <span id="modal-score" style="font-size:1.8rem; font-weight:800; color:#fff;">0%</span>
     </div>
+    <div id="modal-needle" class="gauge-needle"></div>
 </div>
 
+<div style="height: 200px; width: 100%; margin: 20px 0;">
+    <canvas id="opportunityChart"></canvas>
+</div>
+
+<div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+    </div>
+</div>
 <div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px;">
     <div style="background:var(--panel); padding:40px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
         <h2 style="color:var(--gold); margin-bottom:20px;">دخول العضوية 🔑</h2>
@@ -78,22 +129,33 @@
         </div>
         <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
     </div>
+
     <button onclick="handleLogout()" style="background:#f85149; color:white; border:none; padding:5px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">خروج 🚪</button>
+
     <div class="sys-window">
         <div class="ticker" id="ticker-stream">INITIALIZING...</div>
     </div>
 </header>
 
 <div style="display:flex; gap:15px; padding:20px 5%; background:#161b22; border-bottom:1px solid #30363d; align-items:center;">
-    <button id="nav-back" onclick="closeEntryForm()" style="background:#30363d; color:#888; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:not-allowed;" disabled>رجوع للعرض</button>
-    <button id="nav-entry" onclick="openEntryForm()" style="background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">إدخال بيانات</button>
+    <button id="nav-back" onclick="closeEntryForm()" style="background:#30363d; color:#888; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:not-allowed;" disabled>?? رجوع للعرض</button>
+    <button id="nav-entry" onclick="openEntryForm()" style="background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; display:none;">? إدخال بيانات (Supa)</button>
+    <div style="margin-right:auto; display:flex; align-items:center; gap:10px;">
+        <label style="margin:0; color:var(--gold);">المصدر:</label>
+        <select id="data-source-select" onchange="toggleDataSource(this.value)" style="width:200px; padding:8px; background:#000; color:#fff; border:1px solid var(--gold); border-radius:6px; margin:0;">
+    <option value="supabase" selected>سوبا باس</option> 
+    <option value="google">جوجل شيت</option>
+</select>
+    </div>
 </div>
 
 <main id="main-content-area">
     <aside class="sidebar">
         <div class="console-box">
             <div style="display:flex; gap:5px; margin-bottom:20px; background:#000; padding:5px; border-radius:8px; border:1px solid #333;">
-                <button onclick="backToSystem()">ــــــــــ</button>
+<button onclick="backToSystem()">
+    العودة للنظام
+</button>
                 <button onclick="switchToMode('all')" id="btn-mode-all" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:var(--gold); color:#000; font-weight:bold; font-size:0.75rem;">إطلاع الكل</button>
                 <button onclick="switchToMode('today')" id="btn-mode-today" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:#161b22; color:#888; font-weight:bold; font-size:0.75rem;">عمليات اليوم</button>
             </div>
@@ -110,21 +172,19 @@
 </main>
 
 <section id="entry-section" style="display:none; max-width:800px; margin:20px auto; padding:30px; background:var(--panel); border:2px solid var(--accent); border-radius:15px;">
-    <h2 style="color:var(--gold); border-bottom:1px solid var(--accent); padding-bottom:10px; margin-bottom:25px;">إضافة سجل جديد</h2>
+    <h2 style="color:var(--gold); border-bottom:1px solid var(--accent); padding-bottom:10px; margin-bottom:25px;">? إضافة سجل جديد</h2>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
         <div><label>القطاع:</label><input type="text" id="in-industry"></div>
         <div><label>التخصص:</label><input type="text" id="in-niche"></div>
+        <div style="display:none;"><label>التقييم:</label><input type="number" id="id-score"></div>
         <div><label>الشهر:</label><input type="text" id="in-month"></div>
         <div style="grid-column:span 2;"><label>الوصف:</label><textarea id="in-desc" rows="4"></textarea></div>
-        <div><label>حجم السوق الحالى :</label><input type="number" id="in-market"></div>
-        <div><label>قوة الطلب الفعلى:</label><input type="number" id="in-market-2"></div>
-        <div><label>عدد المنافسين:</label><input type="number" id="in-comp"></div>
-        <div><label>قوة المنافسين:</label><input type="number" id="in-comp-2"></div>
-        <div><label>اشارات النمو الحالية:</label><input type="number" id="in-growth"></div>
-        <div><label>استمرار النمو المتوقع:</label><input type="number" id="in-growth-2"></div>
+        <div><label>حجم السوق:</label><input type="text" id="in-market"></div>
+        <div><label>المنافسة:</label><input type="text" id="in-comp"></div>
+        <div><label>النمو:</label><input type="text" id="in-growth"></div>
         <div><label>رابط المصدر:</label><input type="text" id="in-url"></div>
     </div>
-    <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">حفظ</button>
+    <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">حفظ ??</button>
 </section>
 
 <script>
@@ -132,18 +192,20 @@ const SB_URL = 'https://pzekjtpiseplgbbhhzod.supabase.co';
 const SB_KEY = 'sb_publishable_dd_MRF-ea6L-lHcxbtfyUg_exFNdEow';
 const _supabase = supabase.createClient(SB_URL, SB_KEY, {
   auth: {
+    // 🟢 التعديل الجديد: يحفظ الجلسة في ذاكرة التبويب الحالي فقط
     storage: window.sessionStorage, 
     autoRefreshToken: true,
     persistSession: true, 
     detectSessionInUrl: true
   }
 });
-
 let renderIndex = 0;
 const renderBatch = 20;
-let db = [], fullDataStore = [];
-let batchSize = 200;
 
+let db = [], fullDataStore = [], cache = { google: null, supabase: null };
+let offset = 0, batchSize = 200;
+
+// --- تغيير حالة اللمبة ---
 function updateStatusToOnline() {
     const bulb = document.getElementById('led-bulb');
     const text = document.getElementById('status-text');
@@ -151,7 +213,6 @@ function updateStatusToOnline() {
     text.innerText = 'SYSTEM_ONLINE';
     text.style.color = '#238636';
 }
-
 function updateStatusToOffline(msg='SYSTEM_OFFLINE') {
     const bulb = document.getElementById('led-bulb');
     const text = document.getElementById('status-text');
@@ -160,6 +221,7 @@ function updateStatusToOffline(msg='SYSTEM_OFFLINE') {
     text.style.color = '#f85149';
 }
 
+// --- فتح/غلق نموذج الإدخال ---
 function openEntryForm() {
     document.getElementById('main-content-area').style.display = 'none';
     document.getElementById('entry-section').style.display = 'block';
@@ -169,7 +231,6 @@ function openEntryForm() {
     btn.style.color = "#000";
     btn.style.cursor = "pointer";
 }
-
 function closeEntryForm() {
     document.getElementById('entry-section').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'flex';
@@ -180,142 +241,189 @@ function closeEntryForm() {
     btn.style.cursor = "not-allowed";
 }
 
+// --- حفظ البيانات إلى Supabase ---
 async function saveToSupabase() {
-    const { data: userData } = await _supabase.auth.getUser();
-    if (!userData || !userData.user) {
-        alert("يجب تسجيل الدخول أولاً");
-        return;
-    }
+    // 🔴 أضف قبل payload مباشرة
+const { data: userData } = await _supabase.auth.getUser();
 
-    const payload = {
-        Industry: document.getElementById('in-industry').value,
-        Niche: document.getElementById('in-niche').value,
-        Month: document.getElementById('in-month').value,
-        Description: document.getElementById('in-desc').value,
-        "Market Size": parseFloat(document.getElementById('in-market').value) || 0,
-        Competition: parseFloat(document.getElementById('in-comp').value) || 0,
-        "Growth Potential": parseFloat(document.getElementById('in-growth').value) || 0,
-        Market_Size_2: parseFloat(document.getElementById('in-market-2').value) || 0,
-        Competition_2: parseFloat(document.getElementById('in-comp-2').value) || 0,
-        Growth_2: parseFloat(document.getElementById('in-growth-2').value) || 0,
-        SourceURL: document.getElementById('in-url').value,
-        created_at: new Date(),
-        user_id: userData.user.id
-    };
+const payload = {
+    Industry: document.getElementById('in-industry').value,
+    Niche: document.getElementById('in-niche').value,
+    // ❌ حذفنا سطر الـ Score تماماً عشان سوباباس هو اللي هيحسبه
+    Month: document.getElementById('in-month').value,
+    Description: document.getElementById('in-desc').value,
+    "Market Size": document.getElementById('in-market').value,
+    Competition: document.getElementById('in-comp').value,
+    "Growth Potential": document.getElementById('in-growth').value,
+    SourceURL: document.getElementById('in-url').value,
+    created_at: new Date(),
 
+    // ✅ السطر الجديد (أهم شيء)
+    user_id: userData.user.id
+};
     const { error } = await _supabase.from('transactions').insert([payload]);
     if (!error) {
-        alert("تم الحفظ بنجاح!");
+        alert("تم الحفظ!");
+        cache.supabase = null;  // إعادة التحميل
         closeEntryForm();
-        loadSupabaseData();
+        toggleDataSource('supabase');
     } else {
         alert("فشل الحفظ: " + error.message);
     }
 }
 
+// --- جلب البيانات (Supabase) ---
 async function fetchSupabaseBatch(start=0, limit=batchSize) {
-    const { data: userData } = await _supabase.auth.getUser();
-    const { data, error } = await _supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userData?.user?.id || '')
-        .order('created_at', { ascending: false })
-        .range(start, start + limit - 1);
+    // 🔴 أضف أول الدالة
+const { data: userData } = await _supabase.auth.getUser();
 
+const { data, error } = await _supabase
+    .from('transactions')
+    .select('*')
+
+    // ✅ مهم جدًا
+    .eq('user_id', userData?.user?.id) // لاحظ علامات الاستفهام للحماية
+
+    .order('created_at', { ascending: false })
+    .range(start, start + limit -1);
     if (error) throw error;
     return data || [];
 }
 
-async function loadSupabaseData() {
+// --- تبديل المصدر ---
+																
+
+async function toggleDataSource(source) {
+    document.getElementById('nav-entry').style.display = (source === 'supabase') ? 'block' : 'none';
     updateStatusToOffline('CONNECTING...');
-    try {
-        let allData = [], start = 0, batch;
-        do {
-            batch = await fetchSupabaseBatch(start, batchSize);
-            allData.push(...batch.filter(i => i && i.Niche));
-            start += batchSize;
-        } while (batch.length === batchSize);
-        db = allData.reverse();
+
+    if (cache[source]) {
+        db = cache[source];
         finishLoading();
+        return;
+    }
+
+    try {
+        if (source === 'supabase') {
+            let allData = [], start = 0, batch;
+            do {
+                batch = await fetchSupabaseBatch(start, batchSize);
+                allData.push(...batch.filter(i => i && i.Niche));
+                start += batchSize;
+            } while (batch.length === batchSize);
+            db = cache.supabase = allData.reverse();
+            finishLoading();
+        } else {
+            // رابط الـ Deployment اللي طلعلك من جوجل سكريبت
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdwlZh3orl6HRaEJI27r5y-BNA2ip1R9YaAdT-n15PTf16mYfHNsirm_1AX5XfKuBM/exec';
+
+            // مناداة البيانات للديسك توب
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(response => response.json())
+                .then(res => {
+                    if (res && res.cards) {
+                        cache.google = res.cards.filter(i => i && i.Niche).reverse();
+                        db = cache.google;
+                        finishLoading();
+                    }
+                })
+                .catch(err => {
+                    console.error("Google Fail:", err);
+                    updateStatusToOffline('GOOGLE_FAIL');
+                });
+        }
     } catch (err) {
         updateStatusToOffline('LOAD_FAIL');
     }
 }
 
+// دالة مساعدة لتنظيف الكود
 function finishLoading() {
     updateStatusToOnline();
     setupFilters();
     updateTickerWithNew();
     updateTodayCount();
 }
-
+// --- إعداد القوائم المنسدلة ---
 function setupFilters() {
-    const clean = v => v ? v.toString().trim() : null;
-    const fill = (id, key) => {
+    const clean = v => v? v.toString().trim():null;
+    const fill = (id,key) => {
         const el = document.getElementById(id);
         el.innerHTML = '<option value="">-- اختر --</option>';
-        const values = [...new Set(db.map(i => clean(i[key])).filter(Boolean))].sort();
-        values.forEach(v => el.add(new Option(v, v)));
+        const values = [...new Set(db.map(i=>clean(i[key])).filter(Boolean))].sort();
+        values.forEach(v=> el.add(new Option(v,v)));
     };
-    fill('ind-filter', 'Industry');
-    fill('month-filter', 'Month');
-    fill('doc-filter', 'DocType');
-    fill('year-filter', 'Year');
+    fill('ind-filter','Industry');
+    fill('month-filter','Month');
+    fill('doc-filter','DocType');
+    fill('year-filter','Year');
 }
 
-async function executeAnalysis() {
+// --- تشغيل التحليل ---
+async function executeAnalysis(){
+
     const ind = document.getElementById('ind-filter').value;
     const mon = document.getElementById('month-filter').value;
     const yr  = document.getElementById('year-filter').value;
     const doc = document.getElementById('doc-filter').value;
 
-    if (!ind || !mon || !yr || !doc) {
+    if(!ind || !mon || !yr || !doc){
         alert("يجب اختيار كل القوائم أولا");
         return;
     }
 
-    const { data: userData } = await _supabase.auth.getUser();
-    if (!userData || !userData.user) {
-        alert("يجب تسجيل الدخول أولاً");
-        return;
-    }
+    // 🔴 أضف في بداية الدالة
+const { data: userData } = await _supabase.auth.getUser();
 
-    const { data, error } = await _supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userData.user.id)
-        .eq('Industry', ind)
-        .eq('Month', mon)
-        .eq('Year', yr)
-        .eq('DocType', doc)
-        .order('created_at', { ascending: false });
+if (!userData || !userData.user) {
+    alert("يجب تسجيل الدخول أولاً");
+    return;
+}
+const { data, error } = await _supabase
+    .from('transactions')
+    .select('*')
 
-    if (error) {
+    // ✅ السطر الجديد (فلترة المستخدم)
+    .eq('user_id', userData?.user?.id || '')
+
+    .eq('Industry', ind)
+    .eq('Month', mon)
+    .eq('Year', yr)
+    .eq('DocType', doc)
+    .order('created_at', { ascending:false });
+    if(error){
         console.error(error);
         alert("حدث خطأ أثناء جلب البيانات");
         return;
     }
 
     fullDataStore = data || [];
+
     renderIndex = 0;
+
     const view = document.getElementById('main-view');
     view.innerHTML = '';
+
     render();
 }
-
+// --- عرض البيانات ---
 function render() {
     const view = document.getElementById('main-view');
-    if (!fullDataStore.length) {
+
+    if(!fullDataStore.length){
         view.innerHTML = '<div class="loading">لا توجد نتائج</div>';
         return;
     }
 
     const items = fullDataStore.slice(renderIndex, renderIndex + renderBatch);
-    if (!items.length) return;
+
+    if(!items.length) return; // لو خلصت كل البيانات ما نعمل شيء
 
     const html = items.map(item => {
-        const score = parseFloat(item.Score || 0).toFixed(1);
+
+        const score = parseFloat(item.Score || 0);
         const color = score >= 80 ? '#238636' : (score >= 60 ? '#d29922' : '#f85149');
+
         return `<div class="card" style="border-right-color:${color}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:var(--accent); font-weight:bold;">[ ${item.Industry} ]</span>
@@ -325,141 +433,184 @@ function render() {
                     <small style="color:var(--gold); font-weight:bold;">${item.Month||''}</small>
                 </div>
             </div>
-            <h2 style="font-size:2rem; margin:15px 0;">${item.Niche}</h2> 
-            <div style="background:#30363d; height:12px; border-radius:10px; margin:20px 0; overflow:hidden;">
-                <div style="width: ${score}%; background: ${color}; height:100%; transition: width 1s;"></div>
-            </div>
+
+            <h2 style="font-size:2rem; margin:15px 0;">${item.Niche}</h2>
+             <div style="background:#30363d; height:12px; border-radius:10px; margin:20px 0; overflow:hidden;">
+    <div style="width: ${score}%; background: ${color}; height:100%; transition: width 1s;"></div>
+</div>
+
             <div class="desc-box">
                 ${item.Description
                     ? item.Description.replace(/\*\*(.*?)\*\*/g,'<span class="big-star">$1</span>').replace(/\n/g,'<br>')
                     : ''}
             </div>
+
             <div class="stats-grid">
-                <div class="stat-item"><span class="stat-label">حجم السوق 1</span>${item['Market Size']||'-'}</div>
-                <div class="stat-item"><span class="stat-label">حجم السوق 2</span>${item['Market_Size_2']||'-'}</div>
-                <div class="stat-item"><span class="stat-label">المنافسة 1</span>${item.Competition||'-'}</div>
-                <div class="stat-item"><span class="stat-label">المنافسة 2</span>${item['Competition_2']||'-'}</div>
-                <div class="stat-item"><span class="stat-label">النمو 1</span>${item['Growth Potential']||'-'}</div>
-                <div class="stat-item"><span class="stat-label">النمو 2</span>${item['Growth_2']||'-'}</div>
+                <div class="stat-item">
+                    <span class="stat-label">حجم السوق</span>
+                    ${item['Market Size']||'-'}
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">المنافسة</span>
+                    ${item.Competition||'-'}
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">النمو</span>
+                    ${item['Growth Potential']||'-'}
+                </div>
             </div>
+
             ${item.SourceURL
-                ? `<a href="${item.SourceURL}" target="_blank" style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold; display:inline-block; margin-top:10px;">المصدر</a>`
+                ? `<a href="${item.SourceURL}" target="_blank"
+                style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
                 : ''}
-            <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')" style="width:100%; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; margin-top:15px; font-weight:bold; font-family:'Cairo';">
+            
+            <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')" 
+                    style="width:100%; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; margin-top:15px; font-weight:bold; font-family:'Cairo';">
                 🔍 فحص مؤشرات الرادار
             </button>
-        </div>`;
+
+        </div>`; 
+
     }).join('');
 
-    view.insertAdjacentHTML('beforeend', html);
+    view.insertAdjacentHTML('beforeend', html); // ضيف العناصر الجديدة فقط
+
     renderIndex += renderBatch;
 }
 
+// --- تحديث التيكر ---
 function updateTickerWithNew() {
     const ticker = document.getElementById('ticker-stream');
-    if (db && db.length > 0) {
-        const newsUpdates = db.slice(0, 20).map(i => i.New ? i.New : '').filter(Boolean).join(' ⚡ ');
+    if(db && db.length>0){
+        const newsUpdates = db.slice(0,20).map(i=>i.New?i.New:'').filter(Boolean).join(' ⚡ ');
         ticker.innerText = newsUpdates || "SYSTEM_READY: NO_NEW_UPDATES_FOUND";
     }
 }
 
+// --- زر تبديل العرض ---
 function switchToMode(mode) {
     const btnAll = document.getElementById('btn-mode-all');
     const btnToday = document.getElementById('btn-mode-today');
-    if (mode === 'today') {
-        btnToday.style.background = 'var(--gold)'; btnToday.style.color = '#000';
-        btnAll.style.background = '#161b22'; btnAll.style.color = '#888';
+
+    if(mode==='today'){
+        btnToday.style.background=btnToday.style.color='var(--gold)';
+        btnAll.style.background='#161b22'; btnAll.style.color='#888';
+
         const todayISO = new Date().toISOString().split('T')[0];
+
+        // فلترة مباشر على db حسب تاريخ اليوم
         fullDataStore = db.filter(item => {
             const d = new Date(item.created_at || item.Date || item.date);
-            if (isNaN(d)) return false;
+            if(isNaN(d)) return false;
             return d.toISOString().split('T')[0] === todayISO;
-        }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+
         renderIndex = 0;
-        document.getElementById('main-view').innerHTML = '';
+        const view = document.getElementById('main-view');
+        view.innerHTML = '';
         render();
     } else {
-        btnAll.style.background = 'var(--gold)'; btnAll.style.color = '#000';
-        btnToday.style.background = '#161b22'; btnToday.style.color = '#888';
-        fullDataStore = db;
-        renderIndex = 0;
-        document.getElementById('main-view').innerHTML = '';
-        render();
+        btnAll.style.background=btnAll.style.color='var(--gold)';
+        btnToday.style.background='#161b22'; btnToday.style.color='#888';
+        executeAnalysis();
     }
 }
+function updateTodayCount(){
 
-function updateTodayCount() {
-    const today = new Date().toISOString().split('T')[0];
-    const count = db.filter(item => {
-        const d = new Date(item.created_at || item.Date || item.date);
-        if (isNaN(d)) return false;
-        return d.toISOString().split('T')[0] === today;
-    }).length;
-    document.getElementById("today-count").innerText = "عمليات اليوم: " + count;
+const today = new Date().toISOString().split('T')[0];
+
+const count = db.filter(item => {
+
+const d = new Date(item.created_at || item.Date || item.date);
+
+if(isNaN(d)) return false;
+
+return d.toISOString().split('T')[0] === today;
+
+}).length;
+
+document.getElementById("today-count").innerText = "عمليات اليوم: " + count;
+
 }
 
+// --- ربط زر التحليل ---
 document.getElementById('exec-btn').onclick = executeAnalysis;
 
+// --- دالة تسجيل الدخول ---
+// --- دالة تسجيل الدخول (المعدلة لتعمل فوراً) ---
 async function handleLogin() {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     const msg = document.getElementById('login-msg');
+
     if (!email || !pass) {
         msg.innerText = "اكتب البيانات يا عكيد";
         return;
     }
+
     msg.innerText = "جاري التحقق...";
     const { data, error } = await _supabase.auth.signInWithPassword({
         email: email,
         password: pass,
     });
+
     if (error) {
         msg.innerText = "خطأ: " + error.message;
     } else {
         msg.innerText = "تم الدخول بنجاح! جاري فتح الرادار...";
+        
+        // 🟢 التعديل هنا: ننتظر نص ثانية قبل التحديث لضمان استقرار الدخول
         setTimeout(() => {
             window.location.reload();
-        }, 500);
+        }, 500); 
     }
 }
-
+// --- فحص المستخدم عند فتح الصفحة ---
 async function checkUserOnLoad() {
     const { data: { session } } = await _supabase.auth.getSession();
+    
     if (session) {
         document.getElementById('login-screen').style.display = 'none';
-        loadSupabaseData();
+        
+        // التعديل المطلوب: إجبار القائمة على اختيار سوبا باس برمجياً
+        const sourceSelect = document.getElementById('data-source-select');
+        sourceSelect.value = 'supabase'; 
+        
+        toggleDataSource('supabase');  
     } else {
         document.getElementById('login-screen').style.display = 'flex';
     }
 }
-
 async function handleLogout() {
     await _supabase.auth.signOut();
-    window.location.reload();
+    window.location.reload(); // لإعادة تحميل الصفحة واجبار النظام على طلب تسجيل الدخول
 }
 
+// تشغيل النظام
 checkUserOnLoad();
+// دالة فتح النافذة وعرض التحليل
+let myChart = null; // تأمين لمنع تداخل الرسومات
 
-let myChart = null;
 function showAnalysis(itemData) {
     const item = JSON.parse(decodeURIComponent(itemData));
-    const score = parseFloat(item.Score || 0).toFixed(1);
+    const score = parseFloat(item.Score || 0);
     const rotation = (score / 100) * 180 - 90;
 
+    // تحديث العداد
     document.getElementById('modal-title').innerText = item.Niche;
     document.getElementById('modal-score').innerText = score + "%";
     document.getElementById('modal-needle').style.transform = `rotate(${rotation}deg)`;
     
+    // تفاصيل النصوص السفلية
     document.getElementById('modal-details').innerHTML = `
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>حجم السوق 1</small><br>${item['Market Size'] || '-'}</div>
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>حجم السوق 2</small><br>${item.Market_Size_2 || '-'}</div>
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>المنافسة 1</small><br>${item.Competition || '-'}</div>
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>المنافسة 2</small><br>${item.Competition_2 || '-'}</div>
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>النمو 1</small><br>${item['Growth Potential'] || '-'}</div>
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>النمو 2</small><br>${item.Growth_2 || '-'}</div>
+        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>المنافسة</small><br>${item.Competition || '-'}</div>
+        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>النمو</small><br>${item['Growth Potential'] || '-'}</div>
     `;
 
-    if (myChart) { myChart.destroy(); }
+    // 🟢 منطق الرسم البياني المحترم (Chart.js)
+    if (myChart) { myChart.destroy(); } // حذف الرسم القديم قبل رسم الجديد
+
     const ctx = document.getElementById('opportunityChart').getContext('2d');
     myChart = new Chart(ctx, {
         type: 'bar',
@@ -468,9 +619,9 @@ function showAnalysis(itemData) {
             datasets: [{
                 label: 'المؤشر الرقمي',
                 data: [
-                    parseFloat(item['Market Size']) || 0, 
-                    parseFloat(item.Competition) || 0, 
-                    parseFloat(item['Growth Potential']) || 0
+                    parseInt(item['Market Size']) || 50, 
+                    parseInt(item.Competition) || 40, 
+                    parseInt(item['Growth Potential']) || 70
                 ],
                 backgroundColor: ['#58a6ff', '#f85149', '#238636'],
                 borderRadius: 4
@@ -479,27 +630,99 @@ function showAnalysis(itemData) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { legend: { display: false } }, // إخفاء الكلام الزايد
             scales: {
                 y: { beginAtZero: true, max: 100, ticks: { color: '#666' } },
                 x: { ticks: { color: '#fff', font: { family: 'Cairo' } } }
             }
         }
     });
+
     document.getElementById('analysis-modal').style.display = 'flex';
 }
+function openDashboard() {
 
+    if (!db || db.length === 0) {
+        alert("لا توجد بيانات");
+        return;
+    }
+
+    const industryMap = {};
+
+    db.forEach(item => {
+        const ind = item.Industry || "Unknown";
+        const score = parseFloat(item.Score || 0);
+
+        if (!industryMap[ind]) {
+            industryMap[ind] = { total: 0, count: 0 };
+        }
+
+        industryMap[ind].total += score;
+        industryMap[ind].count += 1;
+    });
+
+    let bestIndustry = "";
+    let worstIndustry = "";
+    let bestAvg = -Infinity;
+    let worstAvg = Infinity;
+
+    Object.keys(industryMap).forEach(ind => {
+        const avg = industryMap[ind].total / industryMap[ind].count;
+
+        if (avg > bestAvg) {
+            bestAvg = avg;
+            bestIndustry = ind;
+        }
+
+        if (avg < worstAvg) {
+            worstAvg = avg;
+            worstIndustry = ind;
+        }
+    });
+
+    const avgScore = db.reduce((s,i)=>s+(parseFloat(i.Score)||0),0) / db.length;
+
+    document.getElementById("main-view").innerHTML = `
+        <div class="card">
+            <h2>📊 Dashboard Mode</h2>
+
+            <div class="stats-grid" style="margin-top:20px;">
+                <div class="stat-item">
+                    <span class="stat-label">أفضل قطاع</span>
+                    ${bestIndustry}
+                </div>
+
+                <div class="stat-item">
+                    <span class="stat-label">أضعف قطاع</span>
+                    ${worstIndustry}
+                </div>
+
+                <div class="stat-item">
+                    <span class="stat-label">متوسط السوق</span>
+                    ${avgScore.toFixed(1)}%
+                </div>
+            </div>
+
+            <button onclick="render()" 
+                style="margin-top:20px;background:#238636;color:white;padding:10px;border:none;border-radius:6px;">
+                العودة للنظام
+            </button>
+        </div>
+    `;
+}
+// دالة إغلاق النافذة
 function closeAnalysis() {
     document.getElementById('analysis-modal').style.display = 'none';
 }
-
 function backToSystem() {
     if (!db || db.length === 0) {
         alert("لا توجد بيانات لإعادة العرض");
         return;
     }
-    fullDataStore = db;
+
+    fullDataStore = db;   // 🔥 إعادة ربط البيانات الأساسية
     renderIndex = 0;
+
     document.getElementById("main-view").innerHTML = "";
     render();
 }
