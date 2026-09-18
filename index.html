@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -51,14 +43,14 @@
 
 .gauge-needle { 
     position: absolute; bottom: 0; left: 50%; width: 3px; height: 80px; 
-    background: #fff; transform-origin: bottom center; 
+    background: #991b1b; transform-origin: bottom center; 
     transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
     :root {
-        --bg: #0d1117; --panel: #161b22; --accent: #58a6ff;
+        --bg: #d1d5db; --panel: #44628d; --accent: #58a6ff;
         --gold: #d29922; --green: #238636;
     }
-    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #c9d1d9; margin:0; }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: ##991b1b; margin:0; }
     header { background: var(--panel); padding:10px 5%; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000; }
     .sys-window { background:#562d19; border:1px solid var(--accent); width:450px; height:150px; overflow:hidden; position:relative; border-radius:4px; }
     .ticker { position:absolute; white-space:nowrap; color:#f11197; font-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; animation:scroll-right 40s linear infinite; }
@@ -67,20 +59,24 @@
     .sidebar { width:280px; flex-shrink:0; }
     .console-box { background:var(--panel); border:1px solid #30363d; padding:20px; border-radius:10px; position:sticky; top:80px; }
     label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
-    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--accent); border-radius:6px; }
-    .execute-btn { width:100%; background:var(--gold); color:#000; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
+    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#d1d5db; color:#991b1b; border:1px solid var(--accent); border-radius:6px; }
+    .execute-btn { width:100%; background:var(--gold); color:#d1d5db; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
     .card { background:var(--panel); border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
     .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
-    .desc-box { background:#0d1117; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
-    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; }
-    .stat-item { background:#21262d; padding:15px; border-radius:8px; text-align:center; border:1px solid #30363d; }
+    .desc-box { background:#506178; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
+    .stats-grid { 
+    display:grid; 
+    grid-template-columns:repeat(2,1fr); 
+    gap:15px; 
+}
+    .stat-item { background:#506178; padding:15px; border-radius:8px; text-align:center; border:1px solid #30363d; }
     .stat-label { color:var(--accent); font-size:0.8rem; display:block; margin-bottom:5px; }
     .score-bar-bg { background:#30363d; height:12px; border-radius:10px; margin-top:20px; overflow:hidden; }
     .score-bar-fill { height:100%; transition:width 1s; }
     .loading { text-align:center; padding:100px; font-size:1.2rem; color:var(--gold); }
 
     /* --- لمبة الحالة --- */
-    .status-indicator { display:inline-flex; align-items:center; gap:8px; background:#000; padding:5px 12px; border-radius:20px; border:1px solid #333; margin-top:5px; }
+    .status-indicator { display:inline-flex; align-items:center; gap:8px; background:#d1d5db; padding:5px 12px; border-radius:20px; border:1px solid #333; margin-top:5px; }
     .led-red { width:10px; height:10px; background-color:#f85149; border-radius:50%; box-shadow:0 0 10px #f85149; animation:blink-red 1s infinite; }
     .led-green { width:10px; height:10px; background-color:#238636; border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 2s infinite; }
     @keyframes blink-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
@@ -98,7 +94,7 @@
         <div class="gauge-container">
     <div class="gauge-background"></div>
     <div class="gauge-cover">
-        <span id="modal-score" style="font-size:1.8rem; font-weight:800; color:#fff;">0%</span>
+        <span id="modal-score" style="font-size:1.8rem; font-weight:800; color:#991b1b;">0%</span>
     </div>
     <div id="modal-needle" class="gauge-needle"></div>
 </div>
@@ -130,7 +126,9 @@
         <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
     </div>
 
-    <button onclick="handleLogout()" style="background:#f85149; color:white; border:none; padding:5px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">خروج 🚪</button>
+    <button onclick="handleLogout()" style="position: absolute; top: 140px; left: 5px; z-index: 9999; background: #f85149; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+  EXITE 🚪
+</button>
 
     <div class="sys-window">
         <div class="ticker" id="ticker-stream">INITIALIZING...</div>
@@ -139,12 +137,12 @@
 
 <div style="display:flex; gap:15px; padding:20px 5%; background:#161b22; border-bottom:1px solid #30363d; align-items:center;">
     <button id="nav-back" onclick="closeEntryForm()" style="background:#30363d; color:#888; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:not-allowed;" disabled>?? رجوع للعرض</button>
-    <button id="nav-entry" onclick="openEntryForm()" style="background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; display:none;">? إدخال بيانات (Supa)</button>
+    <button id="nav-entry" onclick="openEntryForm()" style="background:var(--green); color:#991b1b; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; display:none;">? إدخال بيانات (Supa)</button>
     <div style="margin-right:auto; display:flex; align-items:center; gap:10px;">
         <label style="margin:0; color:var(--gold);">المصدر:</label>
-        <select id="data-source-select" onchange="toggleDataSource(this.value)" style="width:200px; padding:8px; background:#000; color:#fff; border:1px solid var(--gold); border-radius:6px; margin:0;">
-    <option value="supabase" selected>سوبا باس</option> 
-    <option value="google">جوجل شيت</option>
+        <select id="data-source-select" onchange="toggleDataSource(this.value)" style="width:200px; padding:8px; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; margin:0;">
+    <option value="supabase" selected>Core Engine</option> 
+    
 </select>
     </div>
 </div>
@@ -152,11 +150,11 @@
 <main id="main-content-area">
     <aside class="sidebar">
         <div class="console-box">
-            <div style="display:flex; gap:5px; margin-bottom:20px; background:#000; padding:5px; border-radius:8px; border:1px solid #333;">
-<button onclick="backToSystem()">
-    العودة للنظام
+            <div style="display:flex; gap:5px; margin-bottom:20px; background:#d1d5db; padding:5px; border-radius:8px; border:1px solid #333;">
+<button onclick="openDashboard()" style="background:#1f6feb; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:0.8rem; cursor:pointer; font-weight:bold;">
+  📊 لوحة المؤشرات
 </button>
-                <button onclick="switchToMode('all')" id="btn-mode-all" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:var(--gold); color:#000; font-weight:bold; font-size:0.75rem;">إطلاع الكل</button>
+                <button onclick="switchToMode('all')" id="btn-mode-all" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:var(--gold); color:#d1d5db; font-weight:bold; font-size:0.75rem;">إطلاع الكل</button>
                 <button onclick="switchToMode('today')" id="btn-mode-today" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:#161b22; color:#888; font-weight:bold; font-size:0.75rem;">عمليات اليوم</button>
             </div>
             <label>1. القطاع:</label><select id="ind-filter"><option value="">اختر</option></select>
@@ -179,9 +177,33 @@
         <div style="display:none;"><label>التقييم:</label><input type="number" id="id-score"></div>
         <div><label>الشهر:</label><input type="text" id="in-month"></div>
         <div style="grid-column:span 2;"><label>الوصف:</label><textarea id="in-desc" rows="4"></textarea></div>
-        <div><label>حجم السوق:</label><input type="text" id="in-market"></div>
-        <div><label>المنافسة:</label><input type="text" id="in-comp"></div>
-        <div><label>النمو:</label><input type="text" id="in-growth"></div>
+        <div>
+<label>حجم السوق الحالى :</label>
+<input type="text" id="in-market">
+</div>
+
+<div>
+<label>قوة الطلب الفعلى:</label>
+<input type="text" id="in-market-2">
+</div>
+<div>
+<label>عدد المنافسين:</label>
+<input type="text" id="in-comp">
+</div>
+
+<div>
+<label>قوة المنافسين:</label>
+<input type="text" id="in-comp-2">
+</div>
+<div>
+<label>اشارات النمو الحالية:</label>
+<input type="text" id="in-growth">
+</div>
+
+<div>
+<label>استمرار النمو المتوقع:</label>
+<input type="text" id="in-growth-2">
+</div>
         <div><label>رابط المصدر:</label><input type="text" id="in-url"></div>
     </div>
     <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">حفظ ??</button>
@@ -200,7 +222,7 @@ const _supabase = supabase.createClient(SB_URL, SB_KEY, {
   }
 });
 let renderIndex = 0;
-const renderBatch = 20;
+const renderBatch = 10;
 
 let db = [], fullDataStore = [], cache = { google: null, supabase: null };
 let offset = 0, batchSize = 200;
@@ -228,7 +250,7 @@ function openEntryForm() {
     const btn = document.getElementById('nav-back');
     btn.disabled = false;
     btn.style.background = "var(--gold)";
-    btn.style.color = "#000";
+    btn.style.color = "#d1d5db";
     btn.style.cursor = "pointer";
 }
 function closeEntryForm() {
@@ -255,6 +277,9 @@ const payload = {
     "Market Size": document.getElementById('in-market').value,
     Competition: document.getElementById('in-comp').value,
     "Growth Potential": document.getElementById('in-growth').value,
+Market_Size_2: document.getElementById('in-market-2').value,
+Competition_2: document.getElementById('in-comp-2').value,
+Growth_2: document.getElementById('in-growth-2').value,
     SourceURL: document.getElementById('in-url').value,
     created_at: new Date(),
 
@@ -315,7 +340,7 @@ async function toggleDataSource(source) {
             finishLoading();
         } else {
             // رابط الـ Deployment اللي طلعلك من جوجل سكريبت
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdwlZh3orl6HRaEJI27r5y-BNA2ip1R9YaAdT-n15PTf16mYfHNsirm_1AX5XfKuBM/exec';
+            const GOOGLE_SCRIPT_URL = 'h';
 
             // مناداة البيانات للديسك توب
             fetch(GOOGLE_SCRIPT_URL)
@@ -410,35 +435,49 @@ const { data, error } = await _supabase
 function render() {
     const view = document.getElementById('main-view');
 
-    if(!fullDataStore.length){
-        view.innerHTML = '<div class="loading">لا توجد نتائج</div>';
+    // 🛑 1. حماية: إذا كانت البيانات فارغة أساساً
+    if (!fullDataStore || !fullDataStore.length) {
+        view.innerHTML = '<div class="loading" style="text-align:center; padding:40px; color:var(--gold);">لا توجد نتائج للعرض</div>';
         return;
     }
 
-    const items = fullDataStore.slice(renderIndex, renderIndex + renderBatch);
+    // 🛑 2. حماية: إذا تم عرض كل البطاقات ووصلنا للنهاية، توقف فوراً
+    if (renderIndex >= fullDataStore.length) return;
 
-    if(!items.length) return; // لو خلصت كل البيانات ما نعمل شيء
+    // اقتطاع الـ 20 بطاقة التالية
+    const items = fullDataStore.slice(renderIndex, renderIndex + renderBatch);
+    if (!items.length) return;
 
     const html = items.map(item => {
-
         const score = parseFloat(item.Score || 0);
         const color = score >= 80 ? '#238636' : (score >= 60 ? '#d29922' : '#f85149');
 
         return `<div class="card" style="border-right-color:${color}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="color:var(--accent); font-weight:bold;">[ ${item.Industry} ]</span>
+                <span style="color:var(--accent); font-weight:bold;">[ ${item.Industry || 'غير محدد'} ]</span>
                 <div style="text-align:left;">
-                    <span style="color:${color}; font-size:1.5rem; font-weight:bold;">${score}%</span>
+                    
                     <br>
-                    <small style="color:var(--gold); font-weight:bold;">${item.Month||''}</small>
+                    <small style="color:var(--gold); font-weight:bold;">${item.Month || ''}</small>
                 </div>
             </div>
 
-            <h2 style="font-size:2rem; margin:15px 0;">${item.Niche}</h2>
-             <div style="background:#30363d; height:12px; border-radius:10px; margin:20px 0; overflow:hidden;">
-    <div style="width: ${score}%; background: ${color}; height:100%; transition: width 1s;"></div>
+            <h2 style="font-size:2rem; margin:15px 0;">${item.Niche || ''}</h2>
+            <!-- الشريط المدرج (مقسم إلى 10 قطاعات) -->
+<!-- شريط متصل مع مسطرة ترقيم مئوية -->
+<div style="margin:20px 0;">
+    <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--gold); margin-bottom:5px; font-weight:bold;">
+        <span>0%</span>
+        <span>25%</span>
+        <span>50%</span>
+        <span>75%</span>
+        <span>100%</span>
+    </div>
+<span style="color:${color}; font-size:1.5rem; font-weight:bold;">${score}%</span>
+    <div style="background:#21262d; height:12px; border-radius:6px; overflow:hidden; border:1px solid #30363d;">
+        <div style="width: ${score}%; background: ${color}; height:100%; transition: width 1s;"></div>
+    </div>
 </div>
-
             <div class="desc-box">
                 ${item.Description
                     ? item.Description.replace(/\*\*(.*?)\*\*/g,'<span class="big-star">$1</span>').replace(/\n/g,'<br>')
@@ -446,39 +485,41 @@ function render() {
             </div>
 
             <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">حجم السوق</span>
-                    ${item['Market Size']||'-'}
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">المنافسة</span>
-                    ${item.Competition||'-'}
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">النمو</span>
-                    ${item['Growth Potential']||'-'}
-                </div>
+                <div class="stat-item"><span class="stat-label">حجم السوق 1</span>${item['Market Size'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">حجم السوق 2</span>${item['Market_Size_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">المنافسة 1</span>${item.Competition || '-'}</div>
+                <div class="stat-item"><span class="stat-label">المنافسة 2</span>${item['Competition_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">النمو 1</span>${item['Growth Potential'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">النمو 2</span>${item['Growth_2'] || '-'}</div>
             </div>
 
             ${item.SourceURL
-                ? `<a href="${item.SourceURL}" target="_blank"
-                style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
+                ? `<a href="${item.SourceURL}" target="_blank" style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
                 : ''}
-            
+            <div style="display: flex; gap: 8px; margin-top: 15px; width: 100%;">
+            <!-- 1. زر فحص المؤشرات الأصلي (أخذ المساحة الأكبر) -->
             <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')" 
-                    style="width:100%; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; margin-top:15px; font-weight:bold; font-family:'Cairo';">
-                🔍 فحص مؤشرات الرادار
+                    style="flex: 2; background: var(--green); color: #991b1b; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">
+                🔍 فحص المؤشرات
             </button>
 
-        </div>`; 
-
-    }).join('');
-
-    view.insertAdjacentHTML('beforeend', html); // ضيف العناصر الجديدة فقط
-
-    renderIndex += renderBatch;
+            <!-- 2. زر التعديل -->
+            <!-- زر التعديل المعدل -->
+<button onclick="editItem(${item.id || item.ID})" 
+              style="flex: 1; background: #21262d; color: #b197fc; border: 1px                    solid #30363d; padding: 10px; border-radius: 8px; cursor: pointer;            font-weight: bold; font-family: 'Cairo';">
+    ✏️ تعديل
+</button>
+            <!-- 3. زر الحذف -->
+            <button onclick="deleteItem('${item.id}')" 
+                    style="flex: 1; background: #21262d; color: #f85149; border: 1px solid #30363d; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">
+                🗑️ حذف
+            </button>
+        </div>
+    </div>`;
+}).join('');
+    view.insertAdjacentHTML('beforeend', html);
+    renderIndex += renderBatch; // زيادة العداد للدفعة التالية
 }
-
 // --- تحديث التيكر ---
 function updateTickerWithNew() {
     const ticker = document.getElementById('ticker-stream');
@@ -494,7 +535,8 @@ function switchToMode(mode) {
     const btnToday = document.getElementById('btn-mode-today');
 
     if(mode==='today'){
-        btnToday.style.background=btnToday.style.color='var(--gold)';
+        btnToday.style.background = 'var(--gold)';
+btnToday.style.color = '#d1d5db';
         btnAll.style.background='#161b22'; btnAll.style.color='#888';
 
         const todayISO = new Date().toISOString().split('T')[0];
@@ -511,10 +553,23 @@ function switchToMode(mode) {
         view.innerHTML = '';
         render();
     } else {
-        btnAll.style.background=btnAll.style.color='var(--gold)';
-        btnToday.style.background='#161b22'; btnToday.style.color='#888';
-        executeAnalysis();
-    }
+
+    btnAll.style.background = 'var(--gold)';
+    btnAll.style.color = '#d1d5db';
+
+    btnToday.style.background = '#161b22';
+    btnToday.style.color = '#888';
+
+    fullDataStore = db;
+
+    renderIndex = 0;
+
+    const view = document.getElementById('main-view');
+
+    view.innerHTML = '';
+
+    render();
+   }
 }
 function updateTodayCount(){
 
@@ -603,37 +658,76 @@ function showAnalysis(itemData) {
     document.getElementById('modal-needle').style.transform = `rotate(${rotation}deg)`;
     
     // تفاصيل النصوص السفلية
-    document.getElementById('modal-details').innerHTML = `
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>المنافسة</small><br>${item.Competition || '-'}</div>
-        <div style="background:#0d1117; padding:8px; border-radius:5px; border:1px solid #333;"><small>النمو</small><br>${item['Growth Potential'] || '-'}</div>
-    `;
+// ✅ الكود المصحح (استبدل السطر أعلاه بهذا):
+document.getElementById('modal-details').innerHTML = `
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--accent)">حجم السوق 1</small><br>${item['Market Size'] || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--accent)">حجم السوق 2</small><br>${item['Market_Size_2'] || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:#f85149">المنافسة 1</small><br>${item.Competition || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:#f85149">المنافسة 2</small><br>${item.Competition_2 || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--green)">النمو 1</small><br>${item['Growth Potential'] || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--green)">النمو 2</small><br>${item.Growth_2 || '-'}
+    </div>
+`;
 
     // 🟢 منطق الرسم البياني المحترم (Chart.js)
-    if (myChart) { myChart.destroy(); } // حذف الرسم القديم قبل رسم الجديد
-
+    // 🟢 الرسم البياني المكدّس (المقسم إلى جزئين)
+// 🟢 4. رسم بياني بـ 6 أعمدة متجاورة (مجموعتان لكل محور)
+    if (myChart) { myChart.destroy(); }
     const ctx = document.getElementById('opportunityChart').getContext('2d');
+
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['السوق', 'المنافسة', 'النمو'],
-            datasets: [{
-                label: 'المؤشر الرقمي',
-                data: [
-                    parseInt(item['Market Size']) || 50, 
-                    parseInt(item.Competition) || 40, 
-                    parseInt(item['Growth Potential']) || 70
-                ],
-                backgroundColor: ['#58a6ff', '#f85149', '#238636'],
-                borderRadius: 4
-            }]
+            datasets: [
+                {
+                    label: 'المؤشر الأول (1)',
+                    data: [
+                        parseInt(item['Market Size']) || 0, 
+                        parseInt(item.Competition) || 0, 
+                        parseInt(item['Growth Potential']) || 0
+                    ],
+                    backgroundColor: ['#58a6ff', '#f85149', '#238636'], // الألوان الأساسية
+                    borderRadius: 4
+                },
+                {
+                    label: 'المؤشر الثاني (2)',
+                    data: [
+                        parseInt(item.Market_Size_2) || 0, 
+                        parseInt(item.Competition_2) || 0, 
+                        parseInt(item.Growth_2) || 0
+                    ],
+                    backgroundColor: ['#1f6beb', '#da3633', '#2ea043'], // درجات أغمق/مختلفة للـ 2
+                    borderRadius: 4
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } }, // إخفاء الكلام الزايد
+            plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, max: 100, ticks: { color: '#666' } },
-                x: { ticks: { color: '#fff', font: { family: 'Cairo' } } }
+                x: { 
+                    stacked: false, // 👈 التكديس ملغي لكي تظهر الأعمدة جنب بعضها
+                    ticks: { color: '#991b1b', font: { family: 'Cairo' } } 
+                },
+                y: { 
+                    stacked: false, // 👈 التكديس ملغي
+                    beginAtZero: true, 
+                    max: 100,
+                    ticks: { color: '#666' } 
+                }
             }
         }
     });
@@ -703,10 +797,9 @@ function openDashboard() {
                 </div>
             </div>
 
-            <button onclick="render()" 
-                style="margin-top:20px;background:#238636;color:white;padding:10px;border:none;border-radius:6px;">
-                العودة للنظام
-            </button>
+            <button onclick="backToSystem()" style="margin-top:20px; background:#238636; color:white; padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
+    العودة للنظام 🏠
+</button>
         </div>
     `;
 }
@@ -725,6 +818,96 @@ function backToSystem() {
 
     document.getElementById("main-view").innerHTML = "";
     render();
+}
+// --- التمرير اللانهائي (Infinite Scroll) ---
+window.addEventListener('scroll', () => {
+    if (typeof renderIndex !== 'undefined' && typeof fullDataStore !== 'undefined') {
+        if (renderIndex >= fullDataStore.length) return;
+
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const threshold = document.documentElement.offsetHeight - 300;
+
+        if (scrollPosition >= threshold) {
+            if (typeof render === 'function') render();
+            else if (typeof renderNextBatch === 'function') renderNextBatch();
+        }
+    }
+});
+
+// --- دالة الحذف المباشر ---
+// متغير عام للتحقق مما إذا كنا في وضع الإضافة أم التعديل
+let editingItemId = null;
+
+// 1. دالة فتح النموذج وتعبئة البيانات القديمة
+function editItem(id) {
+    const numericId = parseInt(id, 10);
+    
+    // البحث عن العنصر في الذاكرة
+    let currentItem = (typeof db !== 'undefined' ? db : fullDataStore).find(item => (item.id || item.ID) == numericId);
+    if (!currentItem) return alert("لم يتم العثور على العنصر!");
+
+    editingItemId = numericId; // حفظ الـ ID الجاري تعديله
+
+    // تعبئة خانات النموذج بالبيانات الحالية
+    document.getElementById('in-industry').value = currentItem.Industry || '';
+    document.getElementById('in-niche').value = currentItem.Niche || '';
+    document.getElementById('in-month').value = currentItem.Month || '';
+    document.getElementById('in-desc').value = currentItem.Description || '';
+    document.getElementById('in-market').value = currentItem["Market Size"] || '';
+    document.getElementById('in-comp').value = currentItem.Competition || '';
+    document.getElementById('in-growth').value = currentItem["Growth Potential"] || '';
+    document.getElementById('in-url').value = currentItem.SourceURL || '';
+
+    // فتح شاشة/نافذة الإدخال
+    if (typeof openEntryForm === 'function') openEntryForm();
+}
+
+// 2. دالة الحفظ الموحدة (تعمل للإضافة والتعديل)
+async function saveItem() {
+    const { data: userData } = await _supabase.auth.getUser();
+
+    const payload = {
+        Industry: document.getElementById('in-industry').value,
+        Niche: document.getElementById('in-niche').value,
+        Month: document.getElementById('in-month').value,
+        Description: document.getElementById('in-desc').value,
+        "Market Size": document.getElementById('in-market').value,
+        Competition: document.getElementById('in-comp').value,
+        "Growth Potential": document.getElementById('in-growth').value,
+        SourceURL: document.getElementById('in-url').value,
+        user_id: userData?.user?.id
+    };
+
+    try {
+        let result;
+        
+        if (editingItemId) {
+            // --- في حالة التعديل ---
+            result = await _supabase
+                .from('transactions')
+                .update(payload)
+                .eq('id', editingItemId);
+        } else {
+            // --- في حالة الإضافة الجديدة ---
+            payload.created_at = new Date();
+            result = await _supabase
+                .from('transactions')
+                .insert([payload]);
+        }
+
+        if (result.error) throw result.error;
+
+        alert(editingItemId ? "تم تعديل البيانات بنجاح! ✏️" : "تم الحفظ بنجاح! 💾");
+
+        // إعادة تصفير متغير التعديل وإغلاق النموذج
+        editingItemId = null;
+        if (typeof cache !== 'undefined') cache.supabase = null;
+        if (typeof closeEntryForm === 'function') closeEntryForm();
+        if (typeof backToSystem === 'function') backToSystem();
+
+    } catch (err) {
+        alert("حدث خطأ: " + err.message);
+    }
 }
 </script>
 </body>
