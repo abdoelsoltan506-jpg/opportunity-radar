@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -834,62 +835,104 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// --- دالة الحذف المباشر ---
-// متغير عام للتحقق مما إذا كنا في وضع الإضافة أم التعديل
+// --- 1. دالة الحذف المباشر (الشغالة) ---
+async function deleteItem(id) {
+    const confirmDelete = confirm("هل أنت متأكد من حذف هذه الفرصة نهائياً؟");
+    if (!confirmDelete) return;
+
+    try {
+        const numericId = parseInt(id, 10);
+
+        const { error } = await _supabase
+            .from('transactions')
+            .delete()
+            .eq('id', numericId);
+
+        if (error) throw error;
+
+        alert("تم الحذف بنجاح من قاعدة البيانات! 🗑️");
+        
+        if (typeof db !== 'undefined') db = db.filter(item => item.id != id);
+        if (typeof fullDataStore !== 'undefined') fullDataStore = fullDataStore.filter(item => item.id != id);
+        
+        if (typeof render === 'function') {
+            render();
+        } else if (typeof backToSystem === 'function') {
+            backToSystem();
+        } else {
+            location.reload(); 
+        }
+
+    } catch (err) {
+        alert("حدث خطأ أثناء الحذف: " + err.message);
+    }
+}
+
+// --- 2. دالة التعديل والحفظ ---
 let editingItemId = null;
 
-// 1. دالة فتح النموذج وتعبئة البيانات القديمة
 function editItem(id) {
     const numericId = parseInt(id, 10);
+    const dataStore = (typeof db !== 'undefined' && db.length > 0) ? db : (typeof fullDataStore !== 'undefined' ? fullDataStore : []);
+    const currentItem = dataStore.find(item => (item.id || item.ID) == numericId);
     
-    // البحث عن العنصر في الذاكرة
-    let currentItem = (typeof db !== 'undefined' ? db : fullDataStore).find(item => (item.id || item.ID) == numericId);
-    if (!currentItem) return alert("لم يتم العثور على العنصر!");
+    if (!currentItem) {
+        alert("لم يتم العثور على بيانات هذه الفرصة!");
+        return;
+    }
 
-    editingItemId = numericId; // حفظ الـ ID الجاري تعديله
+    editingItemId = numericId;
 
-    // تعبئة خانات النموذج بالبيانات الحالية
-    document.getElementById('in-industry').value = currentItem.Industry || '';
-    document.getElementById('in-niche').value = currentItem.Niche || '';
-    document.getElementById('in-month').value = currentItem.Month || '';
-    document.getElementById('in-desc').value = currentItem.Description || '';
-    document.getElementById('in-market').value = currentItem["Market Size"] || '';
-    document.getElementById('in-comp').value = currentItem.Competition || '';
-    document.getElementById('in-growth').value = currentItem["Growth Potential"] || '';
-    document.getElementById('in-url').value = currentItem.SourceURL || '';
+    const setVal = (elemId, val) => {
+        const el = document.getElementById(elemId);
+        if (el) el.value = val || '';
+    };
 
-    // فتح شاشة/نافذة الإدخال
+    setVal('in-industry', currentItem.Industry);
+    setVal('in-niche', currentItem.Niche);
+    setVal('in-month', currentItem.Month);
+    setVal('in-desc', currentItem.Description);
+    setVal('in-market', currentItem["Market Size"]);
+    setVal('in-comp', currentItem.Competition);
+    setVal('in-growth', currentItem["Growth Potential"]);
+    setVal('in-url', currentItem.SourceURL);
+
     if (typeof openEntryForm === 'function') openEntryForm();
 }
 
-// 2. دالة الحفظ الموحدة (تعمل للإضافة والتعديل)
-async function saveItem() {
-    const { data: userData } = await _supabase.auth.getUser();
-
-    const payload = {
-        Industry: document.getElementById('in-industry').value,
-        Niche: document.getElementById('in-niche').value,
-        Month: document.getElementById('in-month').value,
-        Description: document.getElementById('in-desc').value,
-        "Market Size": document.getElementById('in-market').value,
-        Competition: document.getElementById('in-comp').value,
-        "Growth Potential": document.getElementById('in-growth').value,
-        SourceURL: document.getElementById('in-url').value,
-        user_id: userData?.user?.id
-    };
+async function saveItem(event) {
+    if (event && event.preventDefault) event.preventDefault();
 
     try {
+        const { data: userData } = await _supabase.auth.getUser();
+        const userId = userData?.user?.id || null;
+
+        const getVal = (elemId) => {
+            const el = document.getElementById(elemId);
+            return el ? el.value : '';
+        };
+
+        const payload = {
+            Industry: getVal('in-industry'),
+            Niche: getVal('in-niche'),
+            Month: getVal('in-month'),
+            Description: getVal('in-desc'),
+            "Market Size": getVal('in-market'),
+            Competition: getVal('in-comp'),
+            "Growth Potential": getVal('in-growth'),
+            SourceURL: getVal('in-url'),
+            user_id: userId
+        };
+
         let result;
-        
+
         if (editingItemId) {
-            // --- في حالة التعديل ---
             result = await _supabase
                 .from('transactions')
                 .update(payload)
                 .eq('id', editingItemId);
         } else {
-            // --- في حالة الإضافة الجديدة ---
-            payload.created_at = new Date();
+            payload.created_at = new Date().toISOString();
             result = await _supabase
                 .from('transactions')
                 .insert([payload]);
@@ -899,14 +942,14 @@ async function saveItem() {
 
         alert(editingItemId ? "تم تعديل البيانات بنجاح! ✏️" : "تم الحفظ بنجاح! 💾");
 
-        // إعادة تصفير متغير التعديل وإغلاق النموذج
         editingItemId = null;
         if (typeof cache !== 'undefined') cache.supabase = null;
         if (typeof closeEntryForm === 'function') closeEntryForm();
-        if (typeof backToSystem === 'function') backToSystem();
+        if (typeof render === 'function') render();
+        else if (typeof backToSystem === 'function') backToSystem();
 
     } catch (err) {
-        alert("حدث خطأ: " + err.message);
+        alert("فشل الحفظ: " + err.message);
     }
 }
 </script>
