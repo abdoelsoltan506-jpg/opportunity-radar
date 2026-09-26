@@ -765,7 +765,8 @@ async function signInWithGoogle() {
     const { error } = await _supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: window.location.origin
+            redirectTo: 'https://abdoelsoltan506-jpg.github.io/opportunity-radar/'
+
         }
     });
 
