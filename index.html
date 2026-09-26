@@ -82,6 +82,25 @@
     .led-green { width:10px; height:10px; background-color:#238636; border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 2s infinite; }
     @keyframes blink-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
     @keyframes pulse-green { 0%{box-shadow:0 0 0 0 rgba(35,134,54,0.7);} 70%{box-shadow:0 0 0 10px rgba(35,134,54,0);} 100%{box-shadow:0 0 0 0 rgba(35,134,54,0);} }
+.display-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 30px;
+}
+
+.card {
+    display: block;
+    position: static;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+
 </style>
 </head>
 <body>
@@ -127,46 +146,135 @@
         <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
     </div>
 
-    <button onclick="handleLogout()" style="position: absolute; top: 140px; left: 5px; z-index: 9999; background: #f85149; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">
-  EXITE 🚪
+    <div id="member-buttons"
+     style="position:absolute; top:100px; left:5px; z-index:9999; display:flex; flex-direction:column; gap:5px;">
+<button id="subscribe-button"
+        onclick="signInWithGoogle()"
+        style="background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+    اشتراك ⭐
 </button>
 
-    <div class="sys-window">
-        <div class="ticker" id="ticker-stream">INITIALIZING...</div>
-    </div>
-</header>
+    <button id="login-button"
+            onclick="openLoginScreen()"
+            style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+        تسجيل الدخول 🔑
+    </button>
 
-<div style="display:flex; gap:15px; padding:20px 5%; background:#161b22; border-bottom:1px solid #30363d; align-items:center;">
-    <button id="nav-back" onclick="closeEntryForm()" style="background:#30363d; color:#888; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:not-allowed;" disabled>?? رجوع للعرض</button>
-    <button id="nav-entry" onclick="openEntryForm()" style="background:var(--green); color:#991b1b; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; display:none;">? إدخال بيانات (Supa)</button>
-    <div style="margin-right:auto; display:flex; align-items:center; gap:10px;">
+    <button id="logout-button"
+            onclick="handleLogout()"
+            style="display:none; background:#f85149; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+        خروج 🚪
+    </button>
+<div style="margin-right:auto; display:flex; align-items:center; gap:10px;">
         <label style="margin:0; color:var(--gold);">المصدر:</label>
         <select id="data-source-select" onchange="toggleDataSource(this.value)" style="width:200px; padding:8px; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; margin:0;">
     <option value="supabase" selected>Core Engine</option> 
     
 </select>
     </div>
+
 </div>
 
+
+    <div class="sys-window">
+        <div class="ticker" id="ticker-stream">INITIALIZING...</div>
+    </div>
+<div id="header-controls"
+     style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+
+    <div id="radar-buttons"
+         style="display:flex; align-items:center; gap:5px; margin:0; padding:0; flex-wrap:wrap;">
+
+        <button onclick="openDashboard()"
+                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+            📊 لوحة المؤشرات
+        </button>
+
+        <button onclick="switchToMode('all')" id="btn-mode-all"
+                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+            إطلاع الكل
+        </button>
+
+        <button onclick="switchToMode('today')" id="btn-mode-today"
+                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+            عمليات اليوم
+        </button>
+
+    </div>
+
+    <button id="nav-back"
+            onclick="closeEntryForm()"
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;"
+            disabled>
+        رجوع للعرض
+    </button>
+
+    <button id="nav-entry"
+            onclick="openEntryForm()"
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+        إدخال بيانات
+    </button>
+
+</div>
+
+</header>
 <main id="main-content-area">
     <aside class="sidebar">
         <div class="console-box">
-            <div style="display:flex; gap:5px; margin-bottom:20px; background:#d1d5db; padding:5px; border-radius:8px; border:1px solid #333;">
-<button onclick="openDashboard()" style="background:#1f6feb; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:0.8rem; cursor:pointer; font-weight:bold;">
-  📊 لوحة المؤشرات
-</button>
-                <button onclick="switchToMode('all')" id="btn-mode-all" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:var(--gold); color:#d1d5db; font-weight:bold; font-size:0.75rem;">إطلاع الكل</button>
-                <button onclick="switchToMode('today')" id="btn-mode-today" style="flex:1; padding:8px; border:none; border-radius:5px; cursor:pointer; background:#161b22; color:#888; font-weight:bold; font-size:0.75rem;">عمليات اليوم</button>
-            </div>
-            <label>1. القطاع:</label><select id="ind-filter"><option value="">اختر</option></select>
-            <label>2. الشهر:</label><select id="month-filter"><option value="">اختر</option></select>
-            <label>3. السنة:</label><select id="year-filter"><option value="">اختر</option></select>
-            <label>4. نوع المستند:</label><select id="doc-filter"><option value="">اختر</option></select>
+            <label>1. القطاع:</label>
+           <div style="display:flex; align-items:center; gap:5px;">
+    <select id="ind-filter" style="flex:1;">
+        <option value="">اختر القطاع</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('Industry', 'ind-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        فلتر
+    </button>
+</div>
+<label>2. الشهر:</label>
+            <div style="display:flex; align-items:center; gap:5px;">
+    <select id="month-filter" style="flex:1;">
+        <option value="">اختر الشهر</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('Month', 'month-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        فلتر
+    </button>
+</div>
+<label>3. السنة:</label>
+           <div style="display:flex; align-items:center; gap:5px;">
+    <select id="year-filter" style="flex:1;">
+        <option value="">اختر السنة</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('Year', 'year-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        فلتر
+    </button>
+</div>
+<label>4. نوع المستند:</label>
+            <div style="display:flex; align-items:center; gap:5px;">
+    <select id="doc-filter" style="flex:1;">
+        <option value="">اختر نوع المستند</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('DocType', 'doc-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        فلتر
+    </button>
+</div>
+<label>ـــــــــــــــــــــ</label>
             <button class="execute-btn" id="exec-btn">RUN ANALYSIS ></button>
         </div>
     </aside>
     <section class="display-area" id="main-view">
-        <div class="loading">// حدد المعايير للعرض</div>
+        <div class="loading">// من فضلك الضغط على زر اطلاع الكل لعرض بطاقات الفرص</div>
     </section>
 </main>
 
@@ -223,7 +331,7 @@ const _supabase = supabase.createClient(SB_URL, SB_KEY, {
   }
 });
 let renderIndex = 0;
-const renderBatch = 10;
+const renderBatch = 1;
 
 let db = [], fullDataStore = [], cache = { google: null, supabase: null };
 let offset = 0, batchSize = 200;
@@ -248,6 +356,7 @@ function updateStatusToOffline(msg='SYSTEM_OFFLINE') {
 function openEntryForm() {
     document.getElementById('main-content-area').style.display = 'none';
     document.getElementById('entry-section').style.display = 'block';
+document.getElementById('nav-back').style.display = 'block';
     const btn = document.getElementById('nav-back');
     btn.disabled = false;
     btn.style.background = "var(--gold)";
@@ -256,6 +365,7 @@ function openEntryForm() {
 }
 function closeEntryForm() {
     document.getElementById('entry-section').style.display = 'none';
+document.getElementById('nav-back').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'flex';
     const btn = document.getElementById('nav-back');
     btn.disabled = true;
@@ -287,9 +397,24 @@ Growth_2: document.getElementById('in-growth-2').value,
     // ✅ السطر الجديد (أهم شيء)
     user_id: userData.user.id
 };
-    const { error } = await _supabase.from('transactions').insert([payload]);
+    let result;
+
+if (editingItemId) {
+    result = await _supabase
+        .from('transactions')
+        .update(payload)
+        .eq('id', editingItemId);
+} else {
+    result = await _supabase
+        .from('transactions')
+        .insert([payload]);
+}
+
+const { error } = result;
+
     if (!error) {
-        alert("تم الحفظ!");
+    alert(editingItemId ? "تم تعديل البيانات بنجاح!" : "تم الحفظ بنجاح!");
+    editingItemId = null;
         cache.supabase = null;  // إعادة التحميل
         closeEntryForm();
         toggleDataSource('supabase');
@@ -299,20 +424,18 @@ Growth_2: document.getElementById('in-growth-2').value,
 }
 
 // --- جلب البيانات (Supabase) ---
-async function fetchSupabaseBatch(start=0, limit=batchSize) {
-    // 🔴 أضف أول الدالة
-const { data: userData } = await _supabase.auth.getUser();
+async function fetchSupabaseBatch(start = 0, limit = batchSize) {
+    const { data, error } = await _supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(start, start + limit - 1);
 
-const { data, error } = await _supabase
-    .from('transactions')
-    .select('*')
+    if (error) {
+        console.error('Supabase read error:', error);
+        throw error;
+    }
 
-    // ✅ مهم جدًا
-    .eq('user_id', userData?.user?.id) // لاحظ علامات الاستفهام للحماية
-
-    .order('created_at', { ascending: false })
-    .range(start, start + limit -1);
-    if (error) throw error;
     return data || [];
 }
 
@@ -320,7 +443,9 @@ const { data, error } = await _supabase
 																
 
 async function toggleDataSource(source) {
-    document.getElementById('nav-entry').style.display = (source === 'supabase') ? 'block' : 'none';
+    document.getElementById('nav-entry').style.display =
+    (source === 'supabase' && window.isMember) ? 'block' : 'none';
+
     updateStatusToOffline('CONNECTING...');
 
     if (cache[source]) {
@@ -384,6 +509,25 @@ function setupFilters() {
     fill('doc-filter','DocType');
     fill('year-filter','Year');
 }
+function filterSingle(columnName, selectId) {
+    const value = document.getElementById(selectId).value;
+
+    if (!value) {
+        alert("اختر قيمة أولًا");
+        return;
+    }
+
+    fullDataStore = db.filter(item =>
+        String(item[columnName] ?? '').trim() === String(value).trim()
+    );
+
+    renderIndex = 0;
+
+    const view = document.getElementById('main-view');
+    view.innerHTML = '';
+
+    render();
+}
 
 // --- تشغيل التحليل ---
 async function executeAnalysis(){
@@ -394,23 +538,16 @@ async function executeAnalysis(){
     const doc = document.getElementById('doc-filter').value;
 
     if(!ind || !mon || !yr || !doc){
-        alert("يجب اختيار كل القوائم أولا");
+        alert("يجب اختيار كل القوائم");
         return;
     }
 
-    // 🔴 أضف في بداية الدالة
-const { data: userData } = await _supabase.auth.getUser();
-
-if (!userData || !userData.user) {
-    alert("يجب تسجيل الدخول أولاً");
-    return;
-}
+    
 const { data, error } = await _supabase
     .from('transactions')
     .select('*')
 
-    // ✅ السطر الجديد (فلترة المستخدم)
-    .eq('user_id', userData?.user?.id || '')
+    
 
     .eq('Industry', ind)
     .eq('Month', mon)
@@ -497,26 +634,25 @@ function render() {
             ${item.SourceURL
                 ? `<a href="${item.SourceURL}" target="_blank" style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
                 : ''}
-            <div style="display: flex; gap: 8px; margin-top: 15px; width: 100%;">
-            <!-- 1. زر فحص المؤشرات الأصلي (أخذ المساحة الأكبر) -->
-            <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')" 
-                    style="flex: 2; background: var(--green); color: #991b1b; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">
-                🔍 فحص المؤشرات
-            </button>
+            <div style="display:flex; gap:8px; margin-top:15px; width:100%;">
+    <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')"
+            style="flex:2; background:var(--green); color:#991b1b; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
+        🔍 فحص المؤشرات
+    </button>
 
-            <!-- 2. زر التعديل -->
-            <!-- زر التعديل المعدل -->
-<button onclick="editItem(${item.id || item.ID})" 
-              style="flex: 1; background: #21262d; color: #b197fc; border: 1px                    solid #30363d; padding: 10px; border-radius: 8px; cursor: pointer;            font-weight: bold; font-family: 'Cairo';">
-    ✏️ تعديل
-</button>
-            <!-- 3. زر الحذف -->
-            <button onclick="deleteItem('${item.id}')" 
-                    style="flex: 1; background: #21262d; color: #f85149; border: 1px solid #30363d; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">
-                🗑️ حذف
-            </button>
-        </div>
-    </div>`;
+    ${window.isMember ? `
+        <button onclick="editItem(${item.id || item.ID})"
+                style="flex:1; background:#21262d; color:#b197fc; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
+            ✏️ تعديل
+        </button>
+
+        <button onclick="deleteItem('${item.id}')"
+                style="flex:1; background:#21262d; color:#f85149; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
+            🗑️ حذف
+        </button>
+    ` : ''}
+</div>`;
+
 }).join('');
     view.insertAdjacentHTML('beforeend', html);
     renderIndex += renderBatch; // زيادة العداد للدفعة التالية
@@ -601,7 +737,7 @@ async function handleLogin() {
     const msg = document.getElementById('login-msg');
 
     if (!email || !pass) {
-        msg.innerText = "اكتب البيانات يا عكيد";
+        msg.innerText = "اكتب البيانات من فضلك";
         return;
     }
 
@@ -622,22 +758,72 @@ async function handleLogin() {
         }, 500); 
     }
 }
+function openLoginScreen() {
+    document.getElementById('login-screen').style.display = 'flex';
+}
+async function signInWithGoogle() {
+    const { error } = await _supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin
+        }
+    });
+
+    if (error) {
+        alert('تعذر التسجيل عبر Google: ' + error.message);
+    }
+}
+
 // --- فحص المستخدم عند فتح الصفحة ---
 async function checkUserOnLoad() {
     const { data: { session } } = await _supabase.auth.getSession();
-    
+
+    // السماح للجميع برؤية الرادار
+    document.getElementById('login-screen').style.display = 'none';
+
+    let profile = null;
+
     if (session) {
-        document.getElementById('login-screen').style.display = 'none';
-        
-        // التعديل المطلوب: إجبار القائمة على اختيار سوبا باس برمجياً
-        const sourceSelect = document.getElementById('data-source-select');
-        sourceSelect.value = 'supabase'; 
-        
-        toggleDataSource('supabase');  
-    } else {
-        document.getElementById('login-screen').style.display = 'flex';
+        const { data, error } = await _supabase
+            .from('profiles')
+            .select('subscription_status')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+        if (!error) {
+            profile = data;
+        }
     }
+
+    // العضو الفعال فقط يعتبر مشتركًا
+    window.isMember =
+        !!session &&
+        profile?.subscription_status === 'active';
+
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+    const entryButton = document.getElementById('nav-entry');
+
+    if (session) {
+        if (loginButton) loginButton.style.display = 'none';
+        if (logoutButton) logoutButton.style.display = 'block';
+    } else {
+        if (loginButton) loginButton.style.display = 'block';
+        if (logoutButton) logoutButton.style.display = 'none';
+    }
+
+    // إدخال البيانات للمشترك الفعال فقط
+    if (entryButton) {
+        entryButton.style.display = window.isMember ? 'block' : 'none';
+    }
+
+    const sourceSelect = document.getElementById('data-source-select');
+    sourceSelect.value = 'supabase';
+
+    // تحميل البطاقات للجميع
+    toggleDataSource('supabase');
 }
+
 async function handleLogout() {
     await _supabase.auth.signOut();
     window.location.reload(); // لإعادة تحميل الصفحة واجبار النظام على طلب تسجيل الدخول
@@ -893,8 +1079,16 @@ function editItem(id) {
     setVal('in-month', currentItem.Month);
     setVal('in-desc', currentItem.Description);
     setVal('in-market', currentItem["Market Size"]);
-    setVal('in-comp', currentItem.Competition);
-    setVal('in-growth', currentItem["Growth Potential"]);
+setVal('in-market-2', currentItem.Market_Size_2);
+
+setVal('in-comp', currentItem.Competition);
+setVal('in-comp-2', currentItem.Competition_2);
+
+setVal('in-growth', currentItem["Growth Potential"]);
+setVal('in-growth-2', currentItem.Growth_2);
+
+setVal('in-url', currentItem.SourceURL);
+
     setVal('in-url', currentItem.SourceURL);
 
     if (typeof openEntryForm === 'function') openEntryForm();
