@@ -126,16 +126,61 @@
 <div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
     </div>
 </div>
-<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px;">
+<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; none-direction:column; padding:20px;">
     <div style="background:var(--panel); padding:40px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
         <h2 style="color:var(--gold); margin-bottom:20px;">دخول العضوية 🔑</h2>
         <input type="email" id="login-email" placeholder="البريد الإلكتروني" style="margin-bottom:15px;">
         <input type="password" id="login-pass" placeholder="كلمة السر" style="margin-bottom:20px;">
         <button onclick="handleLogin()" class="execute-btn" style="background:var(--green); color:white;">دخول النظام</button>
-        <p id="login-msg" style="color:#f85149; margin-top:15px; font-size:0.8rem;"></p>
+<button type="button"
+        onclick="closeLoginScreen()"
+        style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
+    رجوع
+</button>
+      <p id="login-msg" style="color:#f85149; margin-top:15px; font-size:0.8rem;"></p>
     </div>
 </div>
+<div id="password-setup-modal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px;">
 
+    <div style="background:var(--panel); padding:30px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
+
+        <h2 style="color:var(--gold); margin-bottom:20px;">
+            إنشاء كلمة مرور للموقع
+        </h2>
+
+        <p style="color:white; font-size:0.9rem; margin-bottom:15px;">
+            أنشئ كلمة مرور لاستخدامها في تسجيل الدخول لاحقًا
+        </p>
+
+        <input type="password"
+               id="new-password"
+               placeholder="كلمة المرور الجديدة"
+               style="margin-bottom:15px;">
+
+        <input type="password"
+               id="confirm-password"
+               placeholder="تأكيد كلمة المرور"
+               style="margin-bottom:15px;">
+
+        <button type="button"
+                onclick="saveNewPassword()"
+                style="width:100%; background:var(--green); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
+            حفظ كلمة المرور
+        </button>
+
+        <button type="button"
+                onclick="closePasswordSetup()"
+                style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
+            رجوع
+        </button>
+
+        <p id="password-setup-msg"
+           style="color:#f85149; margin-top:15px; font-size:0.8rem;">
+        </p>
+
+    </div>
+</div>
 <header>
     <div>
         <h2 style="margin:0; color:var(--accent);">RADAR_ENTERPRISE</h2>
@@ -159,8 +204,12 @@
             style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
         تسجيل الدخول 🔑
     </button>
-
-    <button id="logout-button"
+<button id="password-button"
+        onclick="openPasswordSetup()"
+        style="display:none; background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+    كلمة المرور 🔐
+</button>
+  <button id="logout-button"
             onclick="handleLogout()"
             style="display:none; background:#f85149; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
         خروج 🚪
@@ -180,7 +229,8 @@
         <div class="ticker" id="ticker-stream">INITIALIZING...</div>
     </div>
 <div id="header-controls"
-     style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+     style="width:100%; display:
+; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
 
     <div id="radar-buttons"
          style="display:flex; align-items:center; gap:5px; margin:0; padding:0; flex-wrap:wrap;">
@@ -761,12 +811,26 @@ async function handleLogin() {
 function openLoginScreen() {
     document.getElementById('login-screen').style.display = 'flex';
 }
+async function openPasswordSetup() {
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    if (!session) {
+        alert("يجب تسجيل الدخول أولاً حتى نربط كلمة المرور بنفس حسابك.");
+        return;
+    }
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('password-setup-modal').style.display = 'flex';
+}
+
+function closeLoginScreen() {
+    document.getElementById('login-screen').style.display = 'none';
+}
 async function signInWithGoogle() {
     const { error } = await _supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: 'https://abdoelsoltan506-jpg.github.io/opportunity-radar/'
-
+            redirectTo: window.location.origin
         }
     });
 
@@ -805,12 +869,16 @@ async function checkUserOnLoad() {
     const logoutButton = document.getElementById('logout-button');
     const entryButton = document.getElementById('nav-entry');
 
+        const passwordButton = document.getElementById('password-button');
+
     if (session) {
         if (loginButton) loginButton.style.display = 'none';
         if (logoutButton) logoutButton.style.display = 'block';
+        if (passwordButton) passwordButton.style.display = 'block';
     } else {
         if (loginButton) loginButton.style.display = 'block';
         if (logoutButton) logoutButton.style.display = 'none';
+        if (passwordButton) passwordButton.style.display = 'none';
     }
 
     // إدخال البيانات للمشترك الفعال فقط
@@ -1146,6 +1214,57 @@ async function saveItem(event) {
     } catch (err) {
         alert("فشل الحفظ: " + err.message);
     }
+}
+async function saveNewPassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const msg = document.getElementById('password-setup-msg');
+
+    if (!newPassword || !confirmPassword) {
+        msg.innerText = "اكتب كلمة المرور وأعد تأكيدها";
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        msg.innerText = "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل";
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        msg.innerText = "كلمتا المرور غير متطابقتين";
+        return;
+    }
+
+    msg.style.color = "#d29922";
+    msg.innerText = "جاري حفظ كلمة المرور...";
+
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    if (!session) {
+        msg.style.color = "#f85149";
+        msg.innerText = "يجب التحقق من حساب Google أولًا";
+        return;
+    }
+
+    const { error } = await _supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) {
+        msg.style.color = "#f85149";
+        msg.innerText = "تعذر حفظ كلمة المرور: " + error.message;
+        return;
+    }
+
+    msg.style.color = "#238636";
+    msg.innerText = "تم حفظ كلمة المرور لهذا الحساب بنجاح";
+
+    setTimeout(() => {
+        document.getElementById('password-setup-modal').style.display = 'none';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-password').value = '';
+        document.getElementById('password-setup-msg').innerText = '';
+    }, 1500);
 }
 </script>
 </body>
