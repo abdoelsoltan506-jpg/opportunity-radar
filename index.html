@@ -321,6 +321,10 @@
 </div>
 <label>ـــــــــــــــــــــ</label>
             <button class="execute-btn" id="exec-btn">RUN ANALYSIS ></button>
+<div id="members-box" style="display:none; margin-top:20px;">
+    <label>الأعضاء:</label>
+    <div id="members-list" style="max-height:330px; overflow-y:auto; border:1px solid var(--accent); border-radius:6px; background:#d1d5db;"></div>
+</div>
         </div>
     </aside>
     <section class="display-area" id="main-view">
@@ -891,8 +895,39 @@ async function checkUserOnLoad() {
 
     // تحميل البطاقات للجميع
     toggleDataSource('supabase');
+    loadMembersList();
+}
+async function loadMembersList() {
+    const box = document.getElementById('members-box');
+    const list = document.getElementById('members-list');
+    if (!box || !list) return;
+
+    const { data, error } = await _supabase.rpc('get_members_list');
+    if (error) {
+        console.error('Members list error:', error);
+        return;
+    }
+
+    list.innerHTML = '';
+    (data || []).forEach((m, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = (i + 1) + '. ' + m.email;
+        btn.style.cssText = 'display:block; width:100%; text-align:right; padding:8px 10px; border:none; border-bottom:1px solid #aaa; background:transparent; color:#991b1b; cursor:pointer; font-size:0.8rem; font-family:Cairo;';
+        btn.onclick = () => filterByMember(m.user_id);
+        list.appendChild(btn);
+    });
+
+    box.style.display = (data && data.length) ? 'block' : 'none';
 }
 
+function filterByMember(userId) {
+    fullDataStore = db.filter(item => item.user_id === userId);
+    renderIndex = 0;
+    const view = document.getElementById('main-view');
+    view.innerHTML = '';
+    render();
+}
 async function handleLogout() {
     await _supabase.auth.signOut();
     window.location.reload(); // لإعادة تحميل الصفحة واجبار النظام على طلب تسجيل الدخول
