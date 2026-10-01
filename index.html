@@ -193,6 +193,9 @@
 
     <div id="member-buttons"
      style="position:absolute; top:100px; left:5px; z-index:9999; display:flex; flex-direction:column; gap:5px;">
+<div id="user-email-badge"
+     style="display:none; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); padding:4px 10px; border-radius:20px; font-size:0.7rem; font-weight:bold; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+</div>
 <button id="subscribe-button"
         onclick="signInWithGoogle()"
         style="background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
@@ -879,6 +882,8 @@ async function checkUserOnLoad() {
         if (loginButton) loginButton.style.display = 'none';
         if (logoutButton) logoutButton.style.display = 'block';
         if (passwordButton) passwordButton.style.display = 'block';
+           const badge = document.getElementById('user-email-badge');
+        if (badge) { badge.innerText = '👤 ' + session.user.email; badge.style.display = 'block'; }
     } else {
         if (loginButton) loginButton.style.display = 'block';
         if (logoutButton) logoutButton.style.display = 'none';
