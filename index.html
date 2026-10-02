@@ -190,7 +190,10 @@
         </div>
         <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
     </div>
-
+<button onclick="switchToMode('today')" id="btn-mode-today"
+        style="background:#238636; color:white; border:none; padding:4px 12px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap; margin-top:5px;">
+    عمليات اليوم
+</button>
     <div id="member-buttons"
      style="position:absolute; top:100px; left:5px; z-index:9999; display:flex; flex-direction:column; gap:5px;">
 <div id="user-email-badge"
@@ -236,24 +239,8 @@
 ; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
 
     <div id="radar-buttons"
-         style="display:flex; align-items:center; gap:5px; margin:0; padding:0; flex-wrap:wrap;">
-
-        <button onclick="openDashboard()"
-                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
-            📊 لوحة المؤشرات
-        </button>
-
-        <button onclick="switchToMode('all')" id="btn-mode-all"
-                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
-            إطلاع الكل
-        </button>
-
-        <button onclick="switchToMode('today')" id="btn-mode-today"
-                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
-            عمليات اليوم
-        </button>
-
-    </div>
+        style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;"
+</div>
 
     <button id="nav-back"
             onclick="closeEntryForm()"
@@ -274,7 +261,13 @@
 <main id="main-content-area">
     <aside class="sidebar">
         <div class="console-box">
-            <label>1. القطاع:</label>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+    <label style="margin:0;">الأعضاء:</label>
+    <button onclick="switchToMode('all')" id="btn-mode-all"
+            style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+        إطلاع الكل
+    </button>
+</div>
            <div style="display:flex; align-items:center; gap:5px;">
     <select id="ind-filter" style="flex:1;">
         <option value="">اختر القطاع</option>
@@ -325,7 +318,13 @@
 <label>ـــــــــــــــــــــ</label>
             <button class="execute-btn" id="exec-btn">RUN ANALYSIS ></button>
 <div id="members-box" style="display:none; margin-top:20px;">
-    <label>الأعضاء:</label>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+    <label style="margin:0;">الأعضاء:</label>
+    <button onclick="switchToMode('all')" id="btn-mode-all"
+            style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+        إطلاع الكل
+    </button>
+</div>
     <div id="members-list" style="max-height:330px; overflow-y:auto; border:1px solid var(--accent); border-radius:6px; background:#d1d5db;"></div>
 </div>
         </div>
