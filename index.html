@@ -870,7 +870,10 @@ async function checkUserOnLoad() {
         !!session &&
         profile?.subscription_status === 'active';
 
-        const passwordButton = document.getElementById('password-button');
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+    const entryButton = document.getElementById('nav-entry');
+    const passwordButton = document.getElementById('password-button');
     const subscribeButton = document.getElementById('subscribe-button');
     const badge = document.getElementById('user-email-badge');
 
@@ -887,13 +890,14 @@ async function checkUserOnLoad() {
         if (passwordButton) passwordButton.style.display = 'none';
         if (badge) badge.style.display = 'none';
     }
+
     // إدخال البيانات للمشترك الفعال فقط
     if (entryButton) {
         entryButton.style.display = window.isMember ? 'block' : 'none';
     }
 
     const sourceSelect = document.getElementById('data-source-select');
-    sourceSelect.value = 'supabase';
+    if (sourceSelect) sourceSelect.value = 'supabase';
 
     // تحميل البطاقات للجميع
     toggleDataSource('supabase');
