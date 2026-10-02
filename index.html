@@ -194,7 +194,10 @@
 </button>
     </div>
 
-<div id="member-buttons" style="display:flex; flex-direction:column; align-items:flex-start; gap:6px;">
+    <div class="sys-window">
+        <div class="ticker" id="ticker-stream">INITIALIZING...</div>
+    </div>
+<div id="member-buttons" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
 
     <div id="user-email-badge"
          style="display:none; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); padding:4px 10px; border-radius:20px; font-size:0.7rem; font-weight:bold; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
@@ -230,11 +233,6 @@
         </select>
     </div>
 </div>
-
-
-    <div class="sys-window">
-        <div class="ticker" id="ticker-stream">INITIALIZING...</div>
-    </div>
 <div id="header-controls"
      style="width:100%; display:
 ; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
@@ -872,24 +870,23 @@ async function checkUserOnLoad() {
         !!session &&
         profile?.subscription_status === 'active';
 
-    const loginButton = document.getElementById('login-button');
-    const logoutButton = document.getElementById('logout-button');
-    const entryButton = document.getElementById('nav-entry');
-
         const passwordButton = document.getElementById('password-button');
+    const subscribeButton = document.getElementById('subscribe-button');
+    const badge = document.getElementById('user-email-badge');
 
     if (session) {
         if (loginButton) loginButton.style.display = 'none';
+        if (subscribeButton) subscribeButton.style.display = 'none';
         if (logoutButton) logoutButton.style.display = 'block';
         if (passwordButton) passwordButton.style.display = 'block';
-           const badge = document.getElementById('user-email-badge');
         if (badge) { badge.innerText = '👤 ' + session.user.email; badge.style.display = 'block'; }
     } else {
         if (loginButton) loginButton.style.display = 'block';
+        if (subscribeButton) subscribeButton.style.display = 'block';
         if (logoutButton) logoutButton.style.display = 'none';
         if (passwordButton) passwordButton.style.display = 'none';
+        if (badge) badge.style.display = 'none';
     }
-
     // إدخال البيانات للمشترك الفعال فقط
     if (entryButton) {
         entryButton.style.display = window.isMember ? 'block' : 'none';
