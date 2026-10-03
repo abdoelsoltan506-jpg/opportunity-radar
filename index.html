@@ -6,13 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radar Enterprise V6 - Optimized</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-
-
-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?
-
-family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 /* 1. نافذة التحليل (مخفية افتراضياً) */
 #analysis-modal {
@@ -36,18 +32,14 @@ family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 
 .gauge-background { 
     width: 100%; height: 100%; 
-    background: conic-gradient(from -90deg at 50% 100%, #f85149, 
-
-#d29922, #238636); 
+    background: conic-gradient(from -90deg at 50% 100%, #f85149, #d29922, #238636); 
     border-radius: 180px 180px 0 0; 
 }
 
 .gauge-cover { 
     position: absolute; top: 10px; left: 10px; width: 160px; height: 80px; 
     background: #161b22; border-radius: 160px 160px 0 0; 
-    display: flex; align-items: flex-end; justify-content: center; padding-
-
-bottom: 5px;
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px;
 }
 
 .gauge-needle { 
@@ -59,101 +51,37 @@ bottom: 5px;
         --bg: #d1d5db; --panel: #44628d; --accent: #58a6ff;
         --gold: #d29922; --green: #238636;
     }
-    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: 
-
-##991b1b; margin:0; }
-    header { background: var(--panel); padding:10px 5%; border-bottom:3px 
-
-solid var(--gold); display:flex; justify-content:space-between; align-
-
-items:center; position:sticky; top:0; z-index:1000; }
-    .sys-window { background:#562d19; border:1px solid var(--accent); 
-
-width:450px; height:150px; overflow:hidden; position:relative; border-
-
-radius:4px; }
-    .ticker { position:absolute; white-space:nowrap; color:#f11197; font-
-
-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; 
-
-animation:scroll-right 40s linear infinite; }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: ##991b1b; margin:0; }
+    header { background: var(--panel); padding:10px 5%; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000; }
+    .sys-window { background:#562d19; border:1px solid var(--accent); width:450px; height:150px; overflow:hidden; position:relative; border-radius:4px; }
+    .ticker { position:absolute; white-space:nowrap; color:#f11197; font-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; animation:scroll-right 40s linear infinite; }
     @keyframes scroll-right { 0%{left:-100%;} 100%{left:100%;} }
-    main { display:flex; gap:20px; padding:20px; max-width:1600px; 
-
-margin:auto; }
+    main { display:flex; gap:20px; padding:20px; max-width:1600px; margin:auto; }
     .sidebar { width:280px; flex-shrink:0; }
-    .console-box { background:var(--panel); border:1px solid #30363d; 
-
-padding:20px; border-radius:10px; position:sticky; top:80px; }
-    label { font-size:0.8rem; color:var(--gold); display:block; margin-
-
-bottom:5px; font-weight:bold; }
-    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; 
-
-background:#d1d5db; color:#991b1b; border:1px solid var(--accent); 
-
-border-radius:6px; }
-    .execute-btn { width:100%; background:var(--gold); color:#d1d5db; 
-
-border:none; padding:15px; border-radius:6px; font-weight:bold; 
-
-cursor:pointer; transition:0.3s; }
-    .card { background:var(--panel); border:1px solid #30363d; border-
-
-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid 
-
-var(--green); min-height:400px; }
-    .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; 
-
-display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba
-
-(255,157,0,0.3); }
-    .desc-box { background:#506178; padding:25px; border-radius:10px; 
-
-line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid 
-
-#21262d; }
+    .console-box { background:var(--panel); border:1px solid #30363d; padding:20px; border-radius:10px; position:sticky; top:80px; }
+    label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
+    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#d1d5db; color:#991b1b; border:1px solid var(--accent); border-radius:6px; }
+    .execute-btn { width:100%; background:var(--gold); color:#d1d5db; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
+    .card { background:var(--panel); border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
+    .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
+    .desc-box { background:#506178; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
     .stats-grid { 
     display:grid; 
     grid-template-columns:repeat(2,1fr); 
     gap:15px; 
 }
-    .stat-item { background:#506178; padding:15px; border-radius:8px; 
-
-text-align:center; border:1px solid #30363d; }
-    .stat-label { color:var(--accent); font-size:0.8rem; display:block; margin-
-
-bottom:5px; }
-    .score-bar-bg { background:#30363d; height:12px; border-radius:10px; 
-
-margin-top:20px; overflow:hidden; }
+    .stat-item { background:#506178; padding:15px; border-radius:8px; text-align:center; border:1px solid #30363d; }
+    .stat-label { color:var(--accent); font-size:0.8rem; display:block; margin-bottom:5px; }
+    .score-bar-bg { background:#30363d; height:12px; border-radius:10px; margin-top:20px; overflow:hidden; }
     .score-bar-fill { height:100%; transition:width 1s; }
-    .loading { text-align:center; padding:100px; font-size:1.2rem; color:var(--
-
-gold); }
+    .loading { text-align:center; padding:100px; font-size:1.2rem; color:var(--gold); }
 
     /* --- لمبة الحالة --- */
-    .status-indicator { display:inline-flex; align-items:center; gap:8px; 
-
-background:#d1d5db; padding:5px 12px; border-radius:20px; border:1px 
-
-solid #333; margin-top:5px; }
-    .led-red { width:10px; height:10px; background-color:#f85149; border-
-
-radius:50%; box-shadow:0 0 10px #f85149; animation:blink-red 1s infinite; 
-
-}
-    .led-green { width:10px; height:10px; background-color:#238636; 
-
-border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 
-
-2s infinite; }
+    .status-indicator { display:inline-flex; align-items:center; gap:8px; background:#d1d5db; padding:5px 12px; border-radius:20px; border:1px solid #333; margin-top:5px; }
+    .led-red { width:10px; height:10px; background-color:#f85149; border-radius:50%; box-shadow:0 0 10px #f85149; animation:blink-red 1s infinite; }
+    .led-green { width:10px; height:10px; background-color:#238636; border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 2s infinite; }
     @keyframes blink-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-    @keyframes pulse-green { 0%{box-shadow:0 0 0 0 rgba(35,134,54,0.7);} 
-
-70%{box-shadow:0 0 0 10px rgba(35,134,54,0);} 100%{box-shadow:0 0 0 0 
-
-rgba(35,134,54,0);} }
+    @keyframes pulse-green { 0%{box-shadow:0 0 0 0 rgba(35,134,54,0.7);} 70%{box-shadow:0 0 0 10px rgba(35,134,54,0);} 100%{box-shadow:0 0 0 0 rgba(35,134,54,0);} }
 .display-area {
     flex: 1;
     min-width: 0;
@@ -177,28 +105,16 @@ rgba(35,134,54,0);} }
 </head>
 <body>
 <div id="analysis-modal">
-    <div style="background:#161b22; width:90%; max-width:450px; 
-
-padding:30px; border-radius:15px; border:2px solid #d29922; text-
-
-align:center; position:relative;">
+    <div style="background:#161b22; width:90%; max-width:450px; padding:30px; border-radius:15px; border:2px solid #d29922; text-align:center; position:relative;">
         
-        <button onclick="closeAnalysis()" style="position:absolute; top:10px; 
-
-left:10px; background:none; border:none; color:#888; cursor:pointer; font-
-
-size:1.2rem;">✕</button>
+        <button onclick="closeAnalysis()" style="position:absolute; top:10px; left:10px; background:none; border:none; color:#888; cursor:pointer; font-size:1.2rem;">✕</button>
         
-        <h2 id="modal-title" style="color:#58a6ff; margin-bottom:10px;">--
-
-</h2>
+        <h2 id="modal-title" style="color:#58a6ff; margin-bottom:10px;">--</h2>
         
         <div class="gauge-container">
     <div class="gauge-background"></div>
     <div class="gauge-cover">
-        <span id="modal-score" style="font-size:1.8rem; font-weight:800; 
-
-color:#991b1b;">0%</span>
+        <span id="modal-score" style="font-size:1.8rem; font-weight:800; color:#991b1b;">0%</span>
     </div>
     <div id="modal-needle" class="gauge-needle"></div>
 </div>
@@ -207,55 +123,27 @@ color:#991b1b;">0%</span>
     <canvas id="opportunityChart"></canvas>
 </div>
 
-<div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; 
-
-gap:10px;"></div>
+<div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
     </div>
 </div>
-<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; 
-
-height:100%; background:var(--bg); z-index:9999; display:flex; align-
-
-items:center; justify-content:center; none-direction:column; padding:20px;">
-    <div style="background:var(--panel); padding:40px; border-radius:15px; 
-
-border:2px solid var(--gold); width:100%; max-width:400px; text-
-
-align:center;">
+<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; none-direction:column; padding:20px;">
+    <div style="background:var(--panel); padding:40px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
         <h2 style="color:var(--gold); margin-bottom:20px;">دخول العضوية 🔑</h2>
-        <input type="email" id="login-email" placeholder="البريد الإلكتروني" 
-
-style="margin-bottom:15px;">
-        <input type="password" id="login-pass" placeholder="كلمة السر" 
-
-style="margin-bottom:20px;">
-        <button onclick="handleLogin()" class="execute-btn" 
-
-style="background:var(--green); color:white;">دخول النظام</button>
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني" style="margin-bottom:15px;">
+        <input type="password" id="login-pass" placeholder="كلمة السر" style="margin-bottom:20px;">
+        <button onclick="handleLogin()" class="execute-btn" style="background:var(--green); color:white;">دخول النظام</button>
 <button type="button"
         onclick="closeLoginScreen()"
-        style="width:100%; margin-top:10px; background:#30363d; 
-
-color:white; border:none; padding:12px; border-radius:6px; font-
-
-weight:bold; cursor:pointer;">
+        style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
     رجوع
 </button>
-      <p id="login-msg" style="color:#f85149; margin-top:15px; font-
-
-size:0.8rem;"></p>
+      <p id="login-msg" style="color:#f85149; margin-top:15px; font-size:0.8rem;"></p>
     </div>
 </div>
 <div id="password-setup-modal"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); 
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px;">
 
-z-index:10000; align-items:center; justify-content:center; padding:20px;">
-
-    <div style="background:var(--panel); padding:30px; border-radius:15px; 
-
-border:2px solid var(--gold); width:100%; max-width:400px; text-
-
-align:center;">
+    <div style="background:var(--panel); padding:30px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
 
         <h2 style="color:var(--gold); margin-bottom:20px;">
             إنشاء كلمة مرور للموقع
@@ -277,21 +165,13 @@ align:center;">
 
         <button type="button"
                 onclick="saveNewPassword()"
-                style="width:100%; background:var(--green); color:white; 
-
-border:none; padding:12px; border-radius:6px; font-weight:bold; 
-
-cursor:pointer;">
+                style="width:100%; background:var(--green); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
             حفظ كلمة المرور
         </button>
 
         <button type="button"
                 onclick="closePasswordSetup()"
-                style="width:100%; margin-top:10px; background:#30363d; 
-
-color:white; border:none; padding:12px; border-radius:6px; font-
-
-weight:bold; cursor:pointer;">
+                style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
             رجوع
         </button>
 
@@ -301,44 +181,15 @@ weight:bold; cursor:pointer;">
 
     </div>
 </div>
-<header style="position:relative;">
-<button id="logout-button" onclick="handleLogout()"
-            
-
-style="display:none; position:absolute; left:0; top:8px; background:#f85149; 
-
-color:white; border:none; padding:6px 14px; border-radius:6px; font-
-
-size:0.75rem; cursor:pointer; font-weight:bold;">
-        خروج 🚪
-    </button>
+<header>
     <div>
         <h2 style="margin:0; color:var(--accent);">RADAR_ENTERPRISE</h2>
-<div id="user-email-badge"
-         style="display:none; background:#d1d5db; color:#991b1b; border:1px 
-
-solid var(--gold); padding:4px 10px; border-radius:20px; font-size:0.7rem; 
-
-font-weight:bold; max-width:220px; overflow:hidden; text-overflow:ellipsis; 
-
-white-space:nowrap;">
-    </div>
         <div class="status-indicator">
             <div id="led-bulb" class="led-red"></div>
-            <span id="status-text" style="font-size:0.7rem; font-weight:bold; 
-
-color:#f85149;">OFFLINE</span>
+            <span id="status-text" style="font-size:0.7rem; font-weight:bold; color:#f85149;">OFFLINE</span>
         </div>
-        <div id="today-count" style="font-size:0.75rem; color:var(--gold); 
-
-margin-top:5px;">عمليات اليوم: 0</div><button onclick="switchToMode('today')" 
-
-id="btn-mode-today"
-        style="background:#238636; color:white; border:none; padding:4px 
-
-12px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; 
-
-white-space:nowrap; margin-top:5px;">
+        <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div><button onclick="switchToMode('today')" id="btn-mode-today"
+        style="background:#238636; color:white; border:none; padding:4px 12px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap; margin-top:5px;">
     عمليات اليوم
 </button>
     </div>
@@ -346,101 +197,60 @@ white-space:nowrap; margin-top:5px;">
     <div class="sys-window">
         <div class="ticker" id="ticker-stream">INITIALIZING...</div>
     </div>
-<div id="member-buttons" style="display:flex; flex-direction:column; align-
+<div id="member-buttons" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
 
-items:flex-end; gap:6px;">
+    <div id="user-email-badge"
+         style="display:none; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); padding:4px 10px; border-radius:20px; font-size:0.7rem; font-weight:bold; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+    </div>
 
     <div style="display:flex; gap:5px; flex-wrap:wrap;">
         <button id="subscribe-button" onclick="signInWithGoogle()"
-                style="background:#d29922; color:white; border:none; 
-
-padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; 
-
-font-weight:bold;">
+                style="background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
             اشتراك ⭐
         </button>
 
         <button id="login-button" onclick="openLoginScreen()"
-                style="background:#238636; color:white; border:none; 
-
-padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; 
-
-font-weight:bold;">
+                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
             تسجيل الدخول 🔑
         </button>
 
-        
-
-        
-<button id="password-button" onclick="openPasswordSetup()"
-                style="display:none; background:#d29922; color:white; 
-
-border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; 
-
-cursor:pointer; font-weight:bold;">
+        <button id="password-button" onclick="openPasswordSetup()"
+                style="display:none; background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
             كلمة المرور 🔐
-        
+        </button>
+
+        <button id="logout-button" onclick="handleLogout()"
+                style="display:none; background:#f85149; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+            خروج 🚪
+        </button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:6px;">
+        <label style="margin:0; color:var(--gold);">المصدر:</label>
+        <select id="data-source-select" onchange="toggleDataSource(this.value)"
+                style="width:140px; padding:4px 8px; margin:0; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; font-size:0.75rem;">
+            <option value="supabase" selected>Core Engine</option>
+        </select>
     </div>
 </div>
 <div id="header-controls"
      style="width:100%; display:
-; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-
-
-wrap:wrap;">
+; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
 
     <div id="radar-buttons"
-    style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+        style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;"
 </div>
-
-    
-    
-</div>
-
-<div id="source-row"
-     style="position:absolute; left:0; bottom:8px; display:flex; align-
-
-items:center; gap:6px;">
-    <label style="margin:0; color:var(--gold);">المصدر:</label>
-    <select id="data-source-select" onchange="toggleDataSource(this.value)"
-            style="width:140px; padding:4px 8px; margin:0; 
-
-background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-
-
-radius:6px; font-size:0.75rem;">
-        <option value="supabase" selected>Core Engine</option>
-    </select>
-</div>
-<div id="source-actions"
-     style="position:absolute; left:190px; bottom:8px; 
-
-display:flex; align-items:center; gap:5px;">
 
     <button id="nav-back"
-            
-
-onclick="closeEntryForm()"
-            style="display:none; 
-
-background:#238636; color:white; border:none; padding:6px 14px; border-
-
-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-
-
-space:nowrap;"
+            onclick="closeEntryForm()"
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;"
             disabled>
         رجوع للعرض
     </button>
 
-<button 
-
-id="nav-entry"
+    <button id="nav-entry"
             onclick="openEntryForm()"
-            style="display:none; 
-
-background:#238636; color:white; border:none; padding:6px 14px; border-
-
-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-
-
-space:nowrap;">
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
         إدخال بيانات
     </button>
 
@@ -450,16 +260,10 @@ space:nowrap;">
 <main id="main-content-area">
     <aside class="sidebar">
         <div class="console-box">
-            <div style="display:flex; align-items:center; justify-content:space-
-
-between; margin-bottom:5px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
     <label style="margin:0;">1. القطاع:</label>
     <button onclick="openDashboard()"
-            style="background:#238636; color:white; border:none; padding:4px 
-
-10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; 
-
-white-space:nowrap;">
+            style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
         📊 لوحة المؤشرات
     </button>
 </div>
@@ -470,9 +274,7 @@ white-space:nowrap;">
 
     <button type="button"
             onclick="filterSingle('Industry', 'ind-filter')"
-            style="background:#238636; color:white; border:none; padding:6px 
-
-10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
         فلتر
     </button>
 </div>
@@ -484,9 +286,7 @@ white-space:nowrap;">
 
     <button type="button"
             onclick="filterSingle('Month', 'month-filter')"
-            style="background:#238636; color:white; border:none; padding:6px 
-
-10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
         فلتر
     </button>
 </div>
@@ -498,9 +298,7 @@ white-space:nowrap;">
 
     <button type="button"
             onclick="filterSingle('Year', 'year-filter')"
-            style="background:#238636; color:white; border:none; padding:6px 
-
-10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
         فلتر
     </button>
 </div>
@@ -512,63 +310,37 @@ white-space:nowrap;">
 
     <button type="button"
             onclick="filterSingle('DocType', 'doc-filter')"
-            style="background:#238636; color:white; border:none; padding:6px 
-
-10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
         فلتر
     </button>
 </div>
 <label>ـــــــــــــــــــــ</label>
-            <button class="execute-btn" id="exec-btn">RUN ANALYSIS 
-
-></button>
+            <button class="execute-btn" id="exec-btn">RUN ANALYSIS ></button>
 <div id="members-box" style="display:none; margin-top:20px;">
-    <div style="display:flex; align-items:center; justify-content:space-between; 
-
-margin-bottom:5px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
     <label style="margin:0;">الأعضاء:</label>
     <button onclick="switchToMode('all')" id="btn-mode-all"
-            style="background:#238636; color:white; border:none; padding:4px 
-
-10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; 
-
-white-space:nowrap;">
+            style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
         إطلاع الكل
     </button>
 </div>
-    <div id="members-list" style="max-height:330px; overflow-y:auto; 
-
-border:1px solid var(--accent); border-radius:6px; 
-
-background:#d1d5db;"></div>
+    <div id="members-list" style="max-height:330px; overflow-y:auto; border:1px solid var(--accent); border-radius:6px; background:#d1d5db;"></div>
 </div>
         </div>
     </aside>
     <section class="display-area" id="main-view">
-        <div class="loading">// من فضلك الضغط على زر اطلاع الكل لعرض بطاقات 
-
-الفرص</div>
+        <div class="loading">// من فضلك الضغط على زر اطلاع الكل لعرض بطاقات الفرص</div>
     </section>
 </main>
 
-<section id="entry-section" style="display:none; max-width:800px; 
-
-margin:20px auto; padding:30px; background:var(--panel); border:2px solid 
-
-var(--accent); border-radius:15px;">
-    <h2 style="color:var(--gold); border-bottom:1px solid var(--accent); 
-
-padding-bottom:10px; margin-bottom:25px;">? إضافة سجل جديد</h2>
+<section id="entry-section" style="display:none; max-width:800px; margin:20px auto; padding:30px; background:var(--panel); border:2px solid var(--accent); border-radius:15px;">
+    <h2 style="color:var(--gold); border-bottom:1px solid var(--accent); padding-bottom:10px; margin-bottom:25px;">? إضافة سجل جديد</h2>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
         <div><label>القطاع:</label><input type="text" id="in-industry"></div>
         <div><label>التخصص:</label><input type="text" id="in-niche"></div>
-        <div style="display:none;"><label>التقييم:</label><input type="number" 
-
-id="id-score"></div>
+        <div style="display:none;"><label>التقييم:</label><input type="number" id="id-score"></div>
         <div><label>الشهر:</label><input type="text" id="in-month"></div>
-        <div style="grid-column:span 2;"><label>الوصف:</label><textarea 
-
-id="in-desc" rows="4"></textarea></div>
+        <div style="grid-column:span 2;"><label>الوصف:</label><textarea id="in-desc" rows="4"></textarea></div>
         <div>
 <label>حجم السوق الحالى :</label>
 <input type="text" id="in-market">
@@ -598,9 +370,7 @@ id="in-desc" rows="4"></textarea></div>
 </div>
         <div><label>رابط المصدر:</label><input type="text" id="in-url"></div>
     </div>
-    <button onclick="saveToSupabase()" class="execute-btn" style="margin-
-
-top:30px; background:var(--green); color:white;">حفظ ??</button>
+    <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">حفظ ??</button>
 </section>
 
 <script>
@@ -725,9 +495,7 @@ async function fetchSupabaseBatch(start = 0, limit = batchSize) {
 }
 
 // --- تبديل المصدر ---
-								
-
-								
+																
 
 async function toggleDataSource(source) {
     document.getElementById('nav-entry').style.display =
@@ -788,9 +556,7 @@ function setupFilters() {
     const fill = (id,key) => {
         const el = document.getElementById(id);
         el.innerHTML = '<option value="">-- اختر --</option>';
-        const values = [...new Set(db.map(i=>clean(i[key])).filter(Boolean))].sort
-
-();
+        const values = [...new Set(db.map(i=>clean(i[key])).filter(Boolean))].sort();
         values.forEach(v=> el.add(new Option(v,v)));
     };
     fill('ind-filter','Industry');
@@ -864,9 +630,7 @@ function render() {
 
     // 🛑 1. حماية: إذا كانت البيانات فارغة أساساً
     if (!fullDataStore || !fullDataStore.length) {
-        view.innerHTML = '<div class="loading" style="text-align:center; 
-
-padding:40px; color:var(--gold);">لا توجد نتائج للعرض</div>';
+        view.innerHTML = '<div class="loading" style="text-align:center; padding:40px; color:var(--gold);">لا توجد نتائج للعرض</div>';
         return;
     }
 
@@ -874,30 +638,20 @@ padding:40px; color:var(--gold);">لا توجد نتائج للعرض</div>';
     if (renderIndex >= fullDataStore.length) return;
 
     // اقتطاع الـ 20 بطاقة التالية
-    const items = fullDataStore.slice(renderIndex, renderIndex + 
-
-renderBatch);
+    const items = fullDataStore.slice(renderIndex, renderIndex + renderBatch);
     if (!items.length) return;
 
     const html = items.map(item => {
         const score = parseFloat(item.Score || 0);
-        const color = score >= 80 ? '#238636' : (score >= 60 ? '#d29922' : 
-
-'#f85149');
+        const color = score >= 80 ? '#238636' : (score >= 60 ? '#d29922' : '#f85149');
 
         return `<div class="card" style="border-right-color:${color}">
-            <div style="display:flex; justify-content:space-between; align-
-
-items:center;">
-                <span style="color:var(--accent); font-weight:bold;">[ 
-
-${item.Industry || 'غير محدد'} ]</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:var(--accent); font-weight:bold;">[ ${item.Industry || 'غير محدد'} ]</span>
                 <div style="text-align:left;">
                     
                     <br>
-                    <small style="color:var(--gold); font-weight:bold;">${item.Month 
-
-|| ''}</small>
+                    <small style="color:var(--gold); font-weight:bold;">${item.Month || ''}</small>
                 </div>
             </div>
 
@@ -905,90 +659,50 @@ ${item.Industry || 'غير محدد'} ]</span>
             <!-- الشريط المدرج (مقسم إلى 10 قطاعات) -->
 <!-- شريط متصل مع مسطرة ترقيم مئوية -->
 <div style="margin:20px 0;">
-    <div style="display:flex; justify-content:space-between; font-size:0.7rem; 
-
-color:var(--gold); margin-bottom:5px; font-weight:bold;">
+    <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--gold); margin-bottom:5px; font-weight:bold;">
         <span>0%</span>
         <span>25%</span>
         <span>50%</span>
         <span>75%</span>
         <span>100%</span>
     </div>
-<span style="color:${color}; font-size:1.5rem; font-weight:bold;">
-
-${score}%</span>
-    <div style="background:#21262d; height:12px; border-radius:6px; 
-
-overflow:hidden; border:1px solid #30363d;">
-        <div style="width: ${score}%; background: ${color}; height:100%; 
-
-transition: width 1s;"></div>
+<span style="color:${color}; font-size:1.5rem; font-weight:bold;">${score}%</span>
+    <div style="background:#21262d; height:12px; border-radius:6px; overflow:hidden; border:1px solid #30363d;">
+        <div style="width: ${score}%; background: ${color}; height:100%; transition: width 1s;"></div>
     </div>
 </div>
             <div class="desc-box">
                 ${item.Description
-                    ? item.Description.replace(/\*\*(.*?)\*\*/g,'<span class="big-
-
-star">$1</span>').replace(/\n/g,'<br>')
+                    ? item.Description.replace(/\*\*(.*?)\*\*/g,'<span class="big-star">$1</span>').replace(/\n/g,'<br>')
                     : ''}
             </div>
 
             <div class="stats-grid">
-                <div class="stat-item"><span class="stat-label">حجم السوق 
-
-1</span>${item['Market Size'] || '-'}</div>
-                <div class="stat-item"><span class="stat-label">حجم السوق 
-
-2</span>${item['Market_Size_2'] || '-'}</div>
-                <div class="stat-item"><span class="stat-label">المنافسة 1</span>
-
-${item.Competition || '-'}</div>
-                <div class="stat-item"><span class="stat-label">المنافسة 2</span>
-
-${item['Competition_2'] || '-'}</div>
-                <div class="stat-item"><span class="stat-label">النمو 1</span>
-
-${item['Growth Potential'] || '-'}</div>
-                <div class="stat-item"><span class="stat-label">النمو 2</span>
-
-${item['Growth_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">حجم السوق 1</span>${item['Market Size'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">حجم السوق 2</span>${item['Market_Size_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">المنافسة 1</span>${item.Competition || '-'}</div>
+                <div class="stat-item"><span class="stat-label">المنافسة 2</span>${item['Competition_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">النمو 1</span>${item['Growth Potential'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">النمو 2</span>${item['Growth_2'] || '-'}</div>
             </div>
 
             ${item.SourceURL
-                ? `<a href="${item.SourceURL}" target="_blank" 
-
-style="padding:5px 10px; background:#f85149; color:white; border-
-
-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
+                ? `<a href="${item.SourceURL}" target="_blank" style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
                 : ''}
             <div style="display:flex; gap:8px; margin-top:15px; width:100%;">
-    <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify
-
-(item))}')"
-            style="flex:2; background:var(--green); color:#991b1b; border:none; 
-
-padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-
-
-family:'Cairo';">
+    <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')"
+            style="flex:2; background:var(--green); color:#991b1b; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
         🔍 فحص المؤشرات
     </button>
 
     ${window.isMember ? `
         <button onclick="editItem(${item.id || item.ID})"
-                style="flex:1; background:#21262d; color:#b197fc; border:1px 
-
-solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-
-
-weight:bold; font-family:'Cairo';">
+                style="flex:1; background:#21262d; color:#b197fc; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
             ✏️ تعديل
         </button>
 
         <button onclick="deleteItem('${item.id}')"
-                style="flex:1; background:#21262d; color:#f85149; border:1px 
-
-solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-
-
-weight:bold; font-family:'Cairo';">
+                style="flex:1; background:#21262d; color:#f85149; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
             🗑️ حذف
         </button>
     ` : ''}
@@ -1002,12 +716,8 @@ weight:bold; font-family:'Cairo';">
 function updateTickerWithNew() {
     const ticker = document.getElementById('ticker-stream');
     if(db && db.length>0){
-        const newsUpdates = db.slice(0,20).map(i=>i.New?i.New:'').filter
-
-(Boolean).join(' ⚡ ');
-        ticker.innerText = newsUpdates || "SYSTEM_READY: 
-
-NO_NEW_UPDATES_FOUND";
+        const newsUpdates = db.slice(0,20).map(i=>i.New?i.New:'').filter(Boolean).join(' ⚡ ');
+        ticker.innerText = newsUpdates || "SYSTEM_READY: NO_NEW_UPDATES_FOUND";
     }
 }
 
@@ -1172,9 +882,7 @@ async function checkUserOnLoad() {
         if (subscribeButton) subscribeButton.style.display = 'none';
         if (logoutButton) logoutButton.style.display = 'block';
         if (passwordButton) passwordButton.style.display = 'block';
-        if (badge) { badge.innerText = '👤 ' + session.user.email; 
-
-badge.style.display = 'block'; }
+        if (badge) { badge.innerText = '👤 ' + session.user.email; badge.style.display = 'block'; }
     } else {
         if (loginButton) loginButton.style.display = 'block';
         if (subscribeButton) subscribeButton.style.display = 'block';
@@ -1211,13 +919,7 @@ async function loadMembersList() {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = (i + 1) + '. ' + m.email;
-        btn.style.cssText = 'display:block; width:100%; text-align:right; 
-
-padding:8px 10px; border:none; border-bottom:1px solid #aaa; 
-
-background:transparent; color:#991b1b; cursor:pointer; font-size:0.8rem; 
-
-font-family:Cairo;';
+        btn.style.cssText = 'display:block; width:100%; text-align:right; padding:8px 10px; border:none; border-bottom:1px solid #aaa; background:transparent; color:#991b1b; cursor:pointer; font-size:0.8rem; font-family:Cairo;';
         btn.onclick = () => filterByMember(m.user_id);
         list.appendChild(btn);
     });
@@ -1250,54 +952,28 @@ function showAnalysis(itemData) {
     // تحديث العداد
     document.getElementById('modal-title').innerText = item.Niche;
     document.getElementById('modal-score').innerText = score + "%";
-    document.getElementById('modal-needle').style.transform = `rotate
-
-(${rotation}deg)`;
+    document.getElementById('modal-needle').style.transform = `rotate(${rotation}deg)`;
     
     // تفاصيل النصوص السفلية
 // ✅ الكود المصحح (استبدل السطر أعلاه بهذا):
 document.getElementById('modal-details').innerHTML = `
-    <div style="background:#d1d5db; padding:8px; border-radius:5px; 
-
-border:1px solid #333;">
-        <small style="color:var(--accent)">حجم السوق 1</small><br>${item['Market 
-
-Size'] || '-'}
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--accent)">حجم السوق 1</small><br>${item['Market Size'] || '-'}
     </div>
-    <div style="background:#d1d5db; padding:8px; border-radius:5px; 
-
-border:1px solid #333;">
-        <small style="color:var(--accent)">حجم السوق 2</small><br>${item
-
-['Market_Size_2'] || '-'}
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--accent)">حجم السوق 2</small><br>${item['Market_Size_2'] || '-'}
     </div>
-    <div style="background:#d1d5db; padding:8px; border-radius:5px; 
-
-border:1px solid #333;">
-        <small style="color:#f85149">المنافسة 1</small><br>${item.Competition 
-
-|| '-'}
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:#f85149">المنافسة 1</small><br>${item.Competition || '-'}
     </div>
-    <div style="background:#d1d5db; padding:8px; border-radius:5px; 
-
-border:1px solid #333;">
-        <small style="color:#f85149">المنافسة 2</small><br>
-
-${item.Competition_2 || '-'}
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:#f85149">المنافسة 2</small><br>${item.Competition_2 || '-'}
     </div>
-    <div style="background:#d1d5db; padding:8px; border-radius:5px; 
-
-border:1px solid #333;">
-        <small style="color:var(--green)">النمو 1</small><br>${item['Growth 
-
-Potential'] || '-'}
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--green)">النمو 1</small><br>${item['Growth Potential'] || '-'}
     </div>
-    <div style="background:#d1d5db; padding:8px; border-radius:5px; 
-
-border:1px solid #333;">
-        <small style="color:var(--green)">النمو 2</small><br>${item.Growth_2 || 
-
-'-'}
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--green)">النمو 2</small><br>${item.Growth_2 || '-'}
     </div>
 `;
 
@@ -1319,9 +995,7 @@ border:1px solid #333;">
                         parseInt(item.Competition) || 0, 
                         parseInt(item['Growth Potential']) || 0
                     ],
-                    backgroundColor: ['#58a6ff', '#f85149', '#238636'], // الألوان 
-
-الأساسية
+                    backgroundColor: ['#58a6ff', '#f85149', '#238636'], // الألوان الأساسية
                     borderRadius: 4
                 },
                 {
@@ -1331,9 +1005,7 @@ border:1px solid #333;">
                         parseInt(item.Competition_2) || 0, 
                         parseInt(item.Growth_2) || 0
                     ],
-                    backgroundColor: ['#1f6beb', '#da3633', '#2ea043'], // درجات 
-
-أغمق/مختلفة للـ 2
+                    backgroundColor: ['#1f6beb', '#da3633', '#2ea043'], // درجات أغمق/مختلفة للـ 2
                     borderRadius: 4
                 }
             ]
@@ -1399,9 +1071,7 @@ function openDashboard() {
         }
     });
 
-    const avgScore = db.reduce((s,i)=>s+(parseFloat(i.Score)||0),0) / 
-
-db.length;
+    const avgScore = db.reduce((s,i)=>s+(parseFloat(i.Score)||0),0) / db.length;
 
     document.getElementById("main-view").innerHTML = `
         <div class="card">
@@ -1424,11 +1094,7 @@ db.length;
                 </div>
             </div>
 
-            <button onclick="backToSystem()" style="margin-top:20px; 
-
-background:#238636; color:white; padding:10px 18px; border:none; 
-
-border-radius:6px; cursor:pointer; font-weight:bold;">
+            <button onclick="backToSystem()" style="margin-top:20px; background:#238636; color:white; padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
     العودة للنظام 🏠
 </button>
         </div>
@@ -1452,9 +1118,7 @@ function backToSystem() {
 }
 // --- التمرير اللانهائي (Infinite Scroll) ---
 window.addEventListener('scroll', () => {
-    if (typeof renderIndex !== 'undefined' && typeof fullDataStore !== 
-
-'undefined') {
+    if (typeof renderIndex !== 'undefined' && typeof fullDataStore !== 'undefined') {
         if (renderIndex >= fullDataStore.length) return;
 
         const scrollPosition = window.innerHeight + window.scrollY;
@@ -1485,9 +1149,7 @@ async function deleteItem(id) {
         alert("تم الحذف بنجاح من قاعدة البيانات! 🗑️");
         
         if (typeof db !== 'undefined') db = db.filter(item => item.id != id);
-        if (typeof fullDataStore !== 'undefined') fullDataStore = 
-
-fullDataStore.filter(item => item.id != id);
+        if (typeof fullDataStore !== 'undefined') fullDataStore = fullDataStore.filter(item => item.id != id);
         
         if (typeof render === 'function') {
             render();
@@ -1507,12 +1169,8 @@ let editingItemId = null;
 
 function editItem(id) {
     const numericId = parseInt(id, 10);
-    const dataStore = (typeof db !== 'undefined' && db.length > 0) ? db : 
-
-(typeof fullDataStore !== 'undefined' ? fullDataStore : []);
-    const currentItem = dataStore.find(item => (item.id || item.ID) == 
-
-numericId);
+    const dataStore = (typeof db !== 'undefined' && db.length > 0) ? db : (typeof fullDataStore !== 'undefined' ? fullDataStore : []);
+    const currentItem = dataStore.find(item => (item.id || item.ID) == numericId);
     
     if (!currentItem) {
         alert("لم يتم العثور على بيانات هذه الفرصة!");
@@ -1606,9 +1264,7 @@ async function saveItem(event) {
 }
 async function saveNewPassword() {
     const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-
-
-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
     const msg = document.getElementById('password-setup-msg');
 
     if (!newPassword || !confirmPassword) {
@@ -1651,9 +1307,7 @@ password').value;
     msg.innerText = "تم حفظ كلمة المرور لهذا الحساب بنجاح";
 
     setTimeout(() => {
-        document.getElementById('password-setup-modal').style.display = 
-
-'none';
+        document.getElementById('password-setup-modal').style.display = 'none';
         document.getElementById('new-password').value = '';
         document.getElementById('confirm-password').value = '';
         document.getElementById('password-setup-msg').innerText = '';
