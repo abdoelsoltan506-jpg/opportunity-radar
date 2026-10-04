@@ -225,13 +225,7 @@
         </button>
     </div>
 
-    <div style="display:flex; align-items:center; gap:6px;">
-        <label style="margin:0; color:var(--gold);">المصدر:</label>
-        <select id="data-source-select" onchange="toggleDataSource(this.value)"
-                style="width:140px; padding:4px 8px; margin:0; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; font-size:0.75rem;">
-            <option value="supabase" selected>Core Engine</option>
-        </select>
-    </div>
+    
 </div>
 <div id="header-controls"
      style="width:100%; display:
@@ -253,10 +247,18 @@
             style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
         إدخال بيانات
     </button>
-
+</div>
+<div id="source-row"
+     style="position:absolute; left:0; bottom:8px; display:flex; align-items:center; gap:6px;">
+    <label style="margin:0; color:var(--gold);">المصدر:</label>
+    <select id="data-source-select" onchange="toggleDataSource(this.value)"
+            style="width:140px; padding:4px 8px; margin:0; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; font-size:0.75rem;">
+        <option value="supabase" selected>Core Engine</option>
+    </select>
 </div>
 
-</header>
+
+<header style="position:relative;">
 <main id="main-content-area">
     <aside class="sidebar">
         <div class="console-box">
