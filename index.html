@@ -51,9 +51,9 @@
         --bg: #d1d5db; --panel: #44628d; --accent: #58a6ff;
         --gold: #d29922; --green: #238636;
     }
-    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: ##991b1b; margin:0; }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #042a62; margin:0; }
     header { background: var(--panel); padding:10px 5%; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000; }
-    .sys-window { background:#562d19; border:1px solid var(--accent); width:450px; height:150px; overflow:hidden; position:relative; border-radius:4px; }
+    .sys-window { background:#530202; border:1px solid var(--accent); width:450px; height:40px; overflow:hidden; position:relative; border-radius:4px; }
     .ticker { position:absolute; white-space:nowrap; color:#f11197; font-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; animation:scroll-right 40s linear infinite; }
     @keyframes scroll-right { 0%{left:-100%;} 100%{left:100%;} }
     main { display:flex; gap:20px; padding:20px; max-width:1600px; margin:auto; }
@@ -188,13 +188,7 @@
             <div id="led-bulb" class="led-red"></div>
             <span id="status-text" style="font-size:0.7rem; font-weight:bold; color:#f85149;">OFFLINE</span>
         </div>
-        <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div><button onclick="switchToMode('today')" id="btn-mode-today"
-        style="background:#238636; color:white; border:none; padding:4px 12px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap; margin-top:5px;">
-    عمليات اليوم
-</button>
-    </div>
-
-    <div class="sys-window">
+        <div class="sys-window">
         <div class="ticker" id="ticker-stream">INITIALIZING...</div>
     </div>
 <div id="member-buttons" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
@@ -216,12 +210,12 @@
 
         <button id="password-button" onclick="openPasswordSetup()"
                 style="display:none; background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
-            كلمة المرور 🔐
+            تجديد كلمة المرور 🔐
         </button>
 
         <button id="logout-button" onclick="handleLogout()"
                 style="display:none; background:#f85149; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
-            خروج 🚪
+            EXITE🚪
         </button>
     </div>
 </div>
@@ -232,28 +226,31 @@
     <div id="radar-buttons"
         style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;"
 </div>
-
-    <button id="nav-back"
-            onclick="closeEntryForm()"
-            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;"
-            disabled>
-        رجوع للعرض
-    </button>
-
-    <button id="nav-entry"
+</div>
+<div id="source-row"
+     style="position:absolute; left:0; bottom:8px; display:flex; align-items:center; gap:6px;">
+    
+<button id="nav-entry"
             onclick="openEntryForm()"
             style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
         إدخال بيانات
     </button>
-
-</div>
-<div id="source-row"
-     style="position:absolute; left:0; bottom:8px; display:flex; align-items:center; gap:6px;">
-    <label style="margin:0; color:var(--gold);">المصدر:</label>
+<button id="nav-back"
+            onclick="closeEntryForm()"
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;"
+            disabled>
+        BAKE
+    </button>
+<button onclick="switchToMode('today')" id="btn-mode-today"
+        style="background:#238636; color:white; border:none; padding:4px 12px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap; margin-top:5px;">
+    <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
+</button>
+<label style="margin:0; color:var(--gold);">المصدر:</label>
     <select id="data-source-select" onchange="toggleDataSource(this.value)"
             style="width:140px; padding:4px 8px; margin:0; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; font-size:0.75rem;">
         <option value="supabase" selected>Core Engine</option>
     </select>
+    </div>
 </div>
 </header>
 <main id="main-content-area">
@@ -274,7 +271,7 @@
     <button type="button"
             onclick="filterSingle('Industry', 'ind-filter')"
             style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
-        فلتر
+        ENT
     </button>
 </div>
 <label>2. الشهر:</label>
@@ -286,7 +283,7 @@
     <button type="button"
             onclick="filterSingle('Month', 'month-filter')"
             style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
-        فلتر
+        ENT
     </button>
 </div>
 <label>3. السنة:</label>
@@ -298,7 +295,7 @@
     <button type="button"
             onclick="filterSingle('Year', 'year-filter')"
             style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
-        فلتر
+        ENT
     </button>
 </div>
 <label>4. نوع المستند:</label>
@@ -310,7 +307,7 @@
     <button type="button"
             onclick="filterSingle('DocType', 'doc-filter')"
             style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
-        فلتر
+        ENT
     </button>
 </div>
 <label>ـــــــــــــــــــــ</label>
@@ -320,7 +317,7 @@
     <label style="margin:0;">الأعضاء:</label>
     <button onclick="switchToMode('all')" id="btn-mode-all"
             style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
-        إطلاع الكل
+        ALL
     </button>
 </div>
     <div id="members-list" style="max-height:330px; overflow-y:auto; border:1px solid var(--accent); border-radius:6px; background:#d1d5db;"></div>
@@ -328,7 +325,7 @@
         </div>
     </aside>
     <section class="display-area" id="main-view">
-        <div class="loading">// من فضلك الضغط على زر اطلاع الكل لعرض بطاقات الفرص</div>
+        <div class="loading">// من فضلك الضغط على زر ALL لعرض بطاقات الفرص</div>
     </section>
 </main>
 
