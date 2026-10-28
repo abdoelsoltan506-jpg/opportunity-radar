@@ -99,7 +99,222 @@
     margin: 0;
     flex: 0 0 auto;
 }
+/* ============================= */
+/* تنسيق الهاتف والشاشات الصغيرة */
+/* ============================= */
 
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+img,
+canvas {
+    max-width: 100%;
+}
+
+@media (max-width: 900px) {
+    header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        position: relative;
+    }
+
+    header > div {
+        width: 100%;
+    }
+
+    .sys-window {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #member-buttons {
+        width: 100% !important;
+        align-items: stretch !important;
+    }
+
+    #member-buttons > div {
+        justify-content: center;
+        align-items: center;
+    }
+
+    #header-controls {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #radar-buttons {
+        width: 100% !important;
+    }
+
+    #source-row {
+        position: static !important;
+        width: 100%;
+        display: flex !important;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    main {
+        flex-direction: column;
+        width: 100%;
+        padding: 12px;
+        gap: 15px;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .console-box {
+        position: static;
+        width: 100%;
+        padding: 15px;
+    }
+
+    .display-area {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .card {
+        width: 100%;
+        padding: 18px;
+        margin-bottom: 18px;
+        border-right-width: 8px;
+        min-height: auto;
+    }
+
+    .card h2 {
+        font-size: 1.45rem !important;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+
+    .card > a,
+    .card > button {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+        text-align: center;
+    }
+
+    .card > div[style*="display:flex"] {
+        flex-wrap: wrap;
+    }
+
+    .card > div[style*="display:flex"] button {
+        min-width: 100%;
+    }
+
+    .desc-box {
+        padding: 15px;
+        font-size: 1rem;
+        line-height: 2;
+        overflow-wrap: anywhere;
+    }
+
+    #initial-interest-modal,
+    #analysis-modal,
+    #password-setup-modal {
+        padding: 10px !important;
+    }
+
+    #initial-interest-modal > div,
+    #analysis-modal > div,
+    #password-setup-modal > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 18px !important;
+    }
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+        font-size: 16px;
+    }
+
+    .gauge-container {
+        transform: scale(.85);
+        transform-origin: center;
+        margin: 5px auto;
+    }
+}
+
+@media (max-width: 520px) {
+    header h2 {
+        font-size: 1.15rem !important;
+        text-align: center;
+    }
+
+    .status-indicator {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .ticker {
+        font-size: .75rem;
+    }
+
+    #member-buttons button {
+        flex: 1;
+        min-width: 110px;
+        padding: 8px 6px !important;
+    }
+
+    #source-row label {
+        width: 100%;
+        text-align: center;
+    }
+
+    #data-source-select {
+        width: 100% !important;
+    }
+
+    .console-box {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .card h2 {
+        font-size: 1.25rem !important;
+    }
+
+    .card span[style*="font-size:1.5rem"] {
+        font-size: 1.2rem !important;
+    }
+
+    .initial-interest-counter {
+        text-align: center;
+    }
+
+    #initial-interest-submit {
+        min-height: 46px;
+        font-size: .9rem;
+    }
+}
 
 </style>
 </head>
