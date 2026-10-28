@@ -62,7 +62,7 @@
     label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
     select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#d1d5db; color:#991b1b; border:1px solid var(--accent); border-radius:6px; }
     .execute-btn { width:100%; background:var(--gold); color:#d1d5db; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
-    .card { background:var(--panel); border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
+    .card { background:#fff; border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
     .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
     .desc-box { background:#506178; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
     .stats-grid { 
@@ -148,16 +148,20 @@
         </label>
 
         <input type="email"
-               id="initial-interest-gmail"
-               placeholder="example@gmail.com">
+                 id="initial-interest-gmail"
+                placeholder="example@gmail.com"
+              oninput="validateInitialInterest()">
+
 
         <label>
             رقم واتساب — اختياري:
         </label>
 
         <input type="tel"
-               id="initial-interest-whatsapp"
-               placeholder="رقم واتساب">
+              id="initial-interest-whatsapp"
+             placeholder="رقم واتساب"
+            oninput="validateInitialInterest()">
+
 
         <button id="initial-interest-submit"
                 type="button"
@@ -169,6 +173,11 @@
                        cursor:not-allowed;">
             إرسال اهتمام مبدئي
         </button>
+<p id="initial-interest-result"
+   style="margin-top:12px; text-align:center; font-weight:bold;">
+</p>
+
+
     </div>
 </div>
 
@@ -315,7 +324,8 @@
     <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
 </button>
 <label style="margin:0; color:var(--gold);">المصدر:</label>
-    <select id="data-source-select" onchange="toggleDataSource(this.value)"
+    <select id="data-source-select" onchange="
+(this.value)"
             style="width:140px; padding:4px 8px; margin:0; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; font-size:0.75rem;">
         <option value="supabase" selected>Core Engine</option>
     </select>
@@ -649,6 +659,7 @@ let renderIndex = 0;
 const renderBatch = 1;
 
 let db = [], fullDataStore = [], cache = { google: null, supabase: null };
+let initialInterestCounts = {};
 let offset = 0, batchSize = 200;
 
 // --- تغيير حالة اللمبة ---
@@ -808,6 +819,38 @@ async function fetchSupabaseBatch(start = 0, limit = batchSize) {
 
     return data || [];
 }
+async function loadInitialInterestCounts(items) {
+    initialInterestCounts = {};
+
+    const ids = [
+        ...new Set(
+            items
+                .map(item => Number(item.id || item.ID))
+                .filter(id => Number.isInteger(id) && id > 0)
+        )
+    ];
+
+    if (!ids.length) {
+        return;
+    }
+
+    const { data, error } = await _supabase.rpc(
+        'get_initial_interest_counts',
+        {
+            p_transaction_ids: ids
+        }
+    );
+
+    if (error) {
+        console.error('Interest counts error:', error);
+        return;
+    }
+
+    (data || []).forEach(row => {
+        initialInterestCounts[Number(row.transaction_id)] =
+            Number(row.interest_count || 0);
+    });
+}
 
 // --- تبديل المصدر ---
 																
@@ -819,10 +862,16 @@ async function toggleDataSource(source) {
     updateStatusToOffline('CONNECTING...');
 
     if (cache[source]) {
-        db = cache[source];
-        finishLoading();
-        return;
+    db = cache[source];
+
+    if (source === 'supabase') {
+        await loadInitialInterestCounts(db);
     }
+
+    finishLoading();
+    return;
+}
+
 
     try {
         if (source === 'supabase') {
@@ -833,7 +882,11 @@ async function toggleDataSource(source) {
                 start += batchSize;
             } while (batch.length === batchSize);
             db = cache.supabase = allData.reverse();
-            finishLoading();
+
+await loadInitialInterestCounts(db);
+
+finishLoading();
+
         } else {
             // رابط الـ Deployment اللي طلعلك من جوجل سكريبت
             const GOOGLE_SCRIPT_URL = 'h';
@@ -969,8 +1022,11 @@ function render() {
                     <small style="color:var(--gold); font-weight:bold;">${item.Month || ''}</small>
                 </div>
             </div>
+<h2 style="font-size:2rem; margin:15px 0;">
+    ${item.Niche || ''}
+</h2>
 
-            <h2 style="font-size:2rem; margin:15px 0;">${item.Niche || ''}</h2>
+
             <!-- الشريط المدرج (مقسم إلى 10 قطاعات) -->
 
 <span style="color:${color}; font-size:1.5rem; font-weight:bold;">${score}%</span>
@@ -1038,6 +1094,22 @@ function render() {
             🗑️ حذف
         </button>
     ` : ''}
+</div>
+<div style="display:flex;
+            justify-content:right;
+            align-items:center;
+            margin-top:14px;
+            padding:9px 12px;
+            color:var(--gold);
+            border:1px solid var(--gold);
+            border-radius:8px;
+            font-size:.8rem;
+            font-weight:bold;
+            background:rgba(210,153,34,.08);">
+    ◎ أشخاص مهتمون مبدئيًا:
+    <span style="margin-right:5px;">
+        ${initialInterestCounts[Number(item.id || item.ID)] || 0}
+    </span>
 </div>`;
 
 }).join('');
@@ -1688,6 +1760,14 @@ function validateInitialInterest() {
         'initial-interest-text'
     );
 
+    const gmail = document.getElementById(
+        'initial-interest-gmail'
+    );
+
+    const whatsapp = document.getElementById(
+        'initial-interest-whatsapp'
+    );
+
     const counter = document.getElementById(
         'initial-interest-counter'
     );
@@ -1696,19 +1776,32 @@ function validateInitialInterest() {
         'initial-interest-submit'
     );
 
-    const count = countInitialInterestWords(text.value);
-    const valid = count >= 1 && count <= 20;
+    const textCount =
+        countInitialInterestWords(text.value);
 
-    counter.innerText = `${count} / 20 كلمة`;
+    const hasContact =
+        gmail.value.trim() !== '' ||
+        whatsapp.value.trim() !== '';
+
+    const valid =
+        textCount >= 1 &&
+        textCount <= 20 &&
+        hasContact;
+
+    counter.innerText =
+        `${textCount} / 20 كلمة`;
+
     counter.style.color =
-        count > 20 ? '#f85149' : 'var(--gold)';
+        textCount > 20 ? '#f85149' : 'var(--gold)';
 
     button.disabled = !valid;
     button.style.background =
         valid ? 'var(--green)' : '#777';
+
     button.style.cursor =
         valid ? 'pointer' : 'not-allowed';
 }
+
 
 async function openInitialInterestModal(
     transactionId,
@@ -1745,7 +1838,7 @@ async function openInitialInterestModal(
         }
     );
 
-    if (!error && data && data.length > 0) {
+        if (!error && data && data.length > 0) {
         document.getElementById(
             'initial-interest-text'
         ).value = data[0].interest_text || '';
@@ -1759,12 +1852,23 @@ async function openInitialInterestModal(
         ).value = data[0].whatsapp || '';
     }
 
+    const result =
+        document.getElementById(
+            'initial-interest-result'
+        );
+
+    if (result) {
+        result.innerText = '';
+        result.style.color = '';
+    }
+
     validateInitialInterest();
 
     document.getElementById(
         'initial-interest-modal'
     ).style.display = 'flex';
 }
+
 
 function closeInitialInterestModal() {
     document.getElementById(
@@ -1773,6 +1877,11 @@ function closeInitialInterestModal() {
 }
 
 async function submitInitialInterest() {
+    const result =
+        document.getElementById(
+            'initial-interest-result'
+        );
+
     const transactionId = Number(
         document.getElementById(
             'initial-interest-transaction-id'
@@ -1791,9 +1900,26 @@ async function submitInitialInterest() {
         'initial-interest-whatsapp'
     ).value.trim();
 
-    const wordCount = countInitialInterestWords(text);
+    const wordCount =
+        countInitialInterestWords(text);
 
-    if (!transactionId || wordCount < 1 || wordCount > 20) {
+    if (!transactionId) {
+        result.style.color = '#f85149';
+        result.innerText = 'لم يتم تحديد البطاقة.';
+        return;
+    }
+
+    if (wordCount < 1 || wordCount > 20) {
+        result.style.color = '#f85149';
+        result.innerText =
+            'اكتب من كلمة واحدة إلى 20 كلمة كحد أقصى.';
+        return;
+    }
+
+    if (!gmail && !whatsapp) {
+        result.style.color = '#f85149';
+        result.innerText =
+            'أدخل Gmail أو رقم واتساب واحدًا على الأقل.';
         return;
     }
 
@@ -1803,6 +1929,7 @@ async function submitInitialInterest() {
 
     button.disabled = true;
     button.innerText = 'جارٍ الحفظ...';
+    result.innerText = '';
 
     const { error } = await _supabase.rpc(
         'save_initial_interest',
@@ -1818,13 +1945,34 @@ async function submitInitialInterest() {
     if (error) {
         console.error('Initial interest error:', error);
 
+        result.style.color = '#f85149';
+        result.innerText =
+            'لم يتم تسجيل الاهتمام. حاول مرة أخرى.';
+
+        button.disabled = false;
         button.innerText = 'إرسال اهتمام مبدئي';
         validateInitialInterest();
         return;
     }
 
-    closeInitialInterestModal();
+    result.style.color = '#238636';
+    result.innerText =
+        'تم تسجيل اهتمامك بنجاح.';
+
+    button.innerText = 'تم التسجيل';
+
+    setTimeout(() => {
+        closeInitialInterestModal();
+
+        button.innerText =
+            'إرسال اهتمام مبدئي';
+
+        result.innerText = '';
+
+        validateInitialInterest();
+    }, 2500);
 }
+
 
 </script>
 </body>
