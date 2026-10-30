@@ -854,6 +854,14 @@ canvas {
 
 </div>
         <div><label>رابط المصدر:</label><input type="text" id="in-url"></div>
+<div>
+    <label>ظهور البطاقة:</label>
+    <select id="in-visibility">
+        <option value="public">عامة — تظهر في المعرض</option>
+        <option value="private">خاصة — تظهر بالرابط السري فقط</option>
+    </select>
+</div>
+
     </div>
     <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">save</button>
 </section>
@@ -933,6 +941,8 @@ Market_Size_2: document.getElementById('in-market-2').value,
 Competition_2: document.getElementById('in-comp-2').value,
 Growth_2: document.getElementById('in-growth-2').value,
     SourceURL: document.getElementById('in-url').value,
+visibility: document.getElementById('in-visibility').value,
+
     created_at: new Date(),
 
     // ✅ السطر الجديد (أهم شيء)
@@ -944,24 +954,52 @@ if (editingItemId) {
     result = await _supabase
         .from('transactions')
         .update(payload)
-        .eq('id', editingItemId);
+        .eq('id', editingItemId)
+        .select('id, share_token, visibility')
+        .single();
 } else {
     result = await _supabase
         .from('transactions')
-        .insert([payload]);
+        .insert([payload])
+        .select('id, share_token, visibility')
+        .single();
 }
 
-const { error } = result;
+const { data: savedCard, error } = result;
 
-    if (!error) {
-    alert(editingItemId ? "تم تعديل البيانات بنجاح!" : "تم الحفظ بنجاح!");
-    editingItemId = null;
-        cache.supabase = null;  // إعادة التحميل
-        closeEntryForm();
-        toggleDataSource('supabase');
-    } else {
-        alert("فشل الحفظ: " + error.message);
+if (error) {
+    alert("فشل الحفظ: " + error.message);
+    return;
+}
+
+if (savedCard?.visibility === 'private' && savedCard.share_token) {
+    const privateLink =
+        `${window.location.origin}${window.location.pathname}?share=${savedCard.share_token}`;
+
+    try {
+        await navigator.clipboard.writeText(privateLink);
+        alert(
+            "تم الحفظ.\n\nتم نسخ الرابط السري إلى الحافظة.\nأرسله فقط إلى الشخص الذي تريد."
+        );
+    } catch {
+        prompt(
+            "انسخ هذا الرابط السري وأرسله للشخص المطلوب فقط:",
+            privateLink
+        );
     }
+} else {
+    alert(
+        editingItemId
+            ? "تم تعديل البطاقة بنجاح!"
+            : "تم حفظ البطاقة العامة بنجاح!"
+    );
+}
+
+editingItemId = null;
+cache.supabase = null;
+closeEntryForm();
+toggleDataSource('supabase');
+
 }
 function highlightSelectedText() {
     const textarea = document.getElementById('in-desc');
@@ -1023,8 +1061,10 @@ function numberSelectedLines() {
 async function fetchSupabaseBatch(start = 0, limit = batchSize) {
     const { data, error } = await _supabase
         .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false })
+.select('*')
+.eq('visibility', 'public')
+.order('created_at', { ascending: false })
+
         .range(start, start + limit - 1);
 
     if (error) {
@@ -1191,7 +1231,9 @@ const { data, error } = await _supabase
     .eq('Month', mon)
     .eq('Year', yr)
     .eq('DocType', doc)
-    .order('created_at', { ascending:false });
+.eq('visibility', 'public')
+.order('created_at', { ascending:false });
+
     if(error){
         console.error(error);
         alert("حدث خطأ أثناء جلب البيانات");
@@ -1462,6 +1504,45 @@ async function signInWithGoogle() {
         alert('تعذر التسجيل عبر Google: ' + error.message);
     }
 }
+async function openSharedCard(shareToken) {
+    const { data, error } = await _supabase.rpc(
+        'get_shared_transaction',
+        {
+            p_share_token: shareToken
+        }
+    );
+
+    if (error || !data) {
+        document.getElementById('main-view').innerHTML =
+            '<div class="loading">الرابط غير صحيح أو البطاقة لم تعد متاحة.</div>';
+        return;
+    }
+
+    const card = typeof data === 'string'
+        ? JSON.parse(data)
+        : data;
+
+    db = [card];
+    fullDataStore = [card];
+    renderIndex = 0;
+
+    const sidebar = document.querySelector('.sidebar');
+
+    if (sidebar) {
+        sidebar.style.display = 'none';
+    }
+
+    const main = document.getElementById('main-content-area');
+
+    if (main) {
+        main.style.display = 'block';
+    }
+
+    await loadInitialInterestCounts([card]);
+
+    document.getElementById('main-view').innerHTML = '';
+    render();
+}
 
 // --- فحص المستخدم عند فتح الصفحة ---
 async function checkUserOnLoad() {
@@ -1519,8 +1600,18 @@ async function checkUserOnLoad() {
     if (sourceSelect) sourceSelect.value = 'supabase';
 
     // تحميل البطاقات للجميع
-    toggleDataSource('supabase');
-    loadMembersList();
+    const shareToken =
+    new URLSearchParams(window.location.search).get('share');
+
+if (shareToken) {
+    await openSharedCard(shareToken);
+    return;
+}
+
+// تحميل البطاقات العامة فقط
+toggleDataSource('supabase');
+loadMembersList();
+
 }
 async function loadMembersList() {
     const box = document.getElementById('members-box');
