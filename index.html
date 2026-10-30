@@ -1058,22 +1058,43 @@ function numberSelectedLines() {
 }
 
 // --- جلب البيانات (Supabase) ---
-async function fetchSupabaseBatch(start = 0, limit = batchSize) {
-    const { data, error } = await _supabase
+async function fetchSupabaseBatch(
+    start = 0,
+    limit = batchSize,
+    ownerId = null
+) {
+    let query = _supabase
         .from('transactions')
-.select('*')
-.eq('visibility', 'public')
-.order('created_at', { ascending: false })
+        .select('*');
 
+    if (ownerId) {
+        query = query.or(
+            `visibility.eq.public,user_id.eq.${ownerId}`
+        );
+    } else {
+        query = query.eq(
+            'visibility',
+            'public'
+        );
+    }
+
+    const { data, error } = await query
+        .order('created_at', {
+            ascending: false
+        })
         .range(start, start + limit - 1);
 
     if (error) {
-        console.error('Supabase read error:', error);
+        console.error(
+            'Supabase read error:',
+            error
+        );
         throw error;
     }
 
     return data || [];
 }
+
 async function loadInitialInterestCounts(items) {
     initialInterestCounts = {};
 
@@ -1132,7 +1153,12 @@ async function toggleDataSource(source) {
         if (source === 'supabase') {
             let allData = [], start = 0, batch;
             do {
-                batch = await fetchSupabaseBatch(start, batchSize);
+                batch = await fetchSupabaseBatch(
+                              start,
+                              batchSize,
+                             window.currentUserId || null
+                             );
+
                 allData.push(...batch.filter(i => i && i.Niche));
                 start += batchSize;
             } while (batch.length === batchSize);
@@ -1350,8 +1376,45 @@ function render() {
                 style="flex:1; background:#21262d; color:#f85149; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
             🗑️ حذف
         </button>
-    ` : ''}
+        ` : ''}
 </div>
+
+${
+    item.visibility === 'private' &&
+    item.user_id === window.currentUserId
+        ? `
+        <div style="margin-top:14px;
+                    padding:10px;
+                    border:1px solid var(--gold);
+                    border-radius:8px;
+                    background:rgba(210,153,34,.10);
+                    text-align:center;">
+
+            <div style="color:var(--gold);
+                        font-weight:bold;
+                        font-size:.85rem;
+                        margin-bottom:8px;">
+                🔒 بطاقة خاصة — لا تظهر للعامة
+            </div>
+
+            <button type="button"
+                    onclick="copyPrivateLink(
+                        '${item.share_token}'
+                    )"
+                    style="width:100%;
+                           padding:9px;
+                           background:var(--gold);
+                           color:#161b22;
+                           border:none;
+                           border-radius:6px;
+                           cursor:pointer;
+                           font-weight:bold;">
+                🔗 نسخ الرابط الخاص
+            </button>
+        </div>
+        `
+        : ''
+}
 <div style="display:flex;
             justify-content:right;
             align-items:center;
@@ -1543,10 +1606,40 @@ async function openSharedCard(shareToken) {
     document.getElementById('main-view').innerHTML = '';
     render();
 }
+async function copyPrivateLink(
+    shareToken
+) {
+    if (!shareToken) {
+        alert('لا يوجد رابط خاص لهذه البطاقة.');
+        return;
+    }
+
+    const privateLink =
+        'https://abdoelsoltan506-jpg.github.io/' +
+        'opportunity-radar/?share=' +
+        shareToken;
+
+    try {
+        await navigator.clipboard.writeText(
+            privateLink
+        );
+
+        alert(
+            'تم نسخ الرابط الخاص بنجاح.'
+        );
+    } catch (error) {
+        prompt(
+            'انسخ الرابط الخاص:',
+            privateLink
+        );
+    }
+}
 
 // --- فحص المستخدم عند فتح الصفحة ---
 async function checkUserOnLoad() {
     const { data: { session } } = await _supabase.auth.getSession();
+    window.currentUserId = 
+           session?.user?.id || null;
 
     // السماح للجميع برؤية الرادار
     document.getElementById('login-screen').style.display = 'none';
