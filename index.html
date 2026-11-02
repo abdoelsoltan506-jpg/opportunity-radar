@@ -60,9 +60,9 @@
     .sidebar { width:280px; flex-shrink:0; }
     .console-box { background:var(--panel); border:1px solid #30363d; padding:20px; border-radius:10px; position:sticky; top:80px; }
     label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
-    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#d1d5db; color:#991b1b; border:1px solid var(--accent); border-radius:6px; }
+    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#fdfdfd; color:#991b1b; border:1px solid var(--accent); border-radius:6px; }
     .execute-btn { width:100%; background:var(--gold); color:#d1d5db; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
-    .card { background:#fff; border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
+    .card { background:var(--panel); border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
     .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
     .desc-box { background:#506178; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
     .stats-grid { 
@@ -99,222 +99,7 @@
     margin: 0;
     flex: 0 0 auto;
 }
-/* ============================= */
-/* تنسيق الهاتف والشاشات الصغيرة */
-/* ============================= */
 
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-img,
-canvas {
-    max-width: 100%;
-}
-
-@media (max-width: 900px) {
-    header {
-        padding: 10px 12px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        position: relative;
-    }
-
-    header > div {
-        width: 100%;
-    }
-
-    .sys-window {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    #member-buttons {
-        width: 100% !important;
-        align-items: stretch !important;
-    }
-
-    #member-buttons > div {
-        justify-content: center;
-        align-items: center;
-    }
-
-    #header-controls {
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    #radar-buttons {
-        width: 100% !important;
-    }
-
-    #source-row {
-        position: static !important;
-        width: 100%;
-        display: flex !important;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    main {
-        flex-direction: column;
-        width: 100%;
-        padding: 12px;
-        gap: 15px;
-    }
-
-    .sidebar {
-        width: 100%;
-    }
-
-    .console-box {
-        position: static;
-        width: 100%;
-        padding: 15px;
-    }
-
-    .display-area {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .card {
-        width: 100%;
-        padding: 18px;
-        margin-bottom: 18px;
-        border-right-width: 8px;
-        min-height: auto;
-    }
-
-    .card h2 {
-        font-size: 1.45rem !important;
-        line-height: 1.6;
-        word-break: break-word;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr !important;
-        gap: 10px;
-    }
-
-    .card > a,
-    .card > button {
-        display: block;
-        width: 100%;
-        margin-top: 8px;
-        text-align: center;
-    }
-
-    .card > div[style*="display:flex"] {
-        flex-wrap: wrap;
-    }
-
-    .card > div[style*="display:flex"] button {
-        min-width: 100%;
-    }
-
-    .desc-box {
-        padding: 15px;
-        font-size: 1rem;
-        line-height: 2;
-        overflow-wrap: anywhere;
-    }
-
-    #initial-interest-modal,
-    #analysis-modal,
-    #password-setup-modal {
-        padding: 10px !important;
-    }
-
-    #initial-interest-modal > div,
-    #analysis-modal > div,
-    #password-setup-modal > div {
-        width: 100% !important;
-        max-width: 100% !important;
-        max-height: 92vh;
-        overflow-y: auto;
-        padding: 18px !important;
-    }
-
-    input,
-    select,
-    textarea {
-        max-width: 100%;
-        font-size: 16px;
-    }
-
-    .gauge-container {
-        transform: scale(.85);
-        transform-origin: center;
-        margin: 5px auto;
-    }
-}
-
-@media (max-width: 520px) {
-    header h2 {
-        font-size: 1.15rem !important;
-        text-align: center;
-    }
-
-    .status-indicator {
-        justify-content: center;
-        width: 100%;
-    }
-
-    .ticker {
-        font-size: .75rem;
-    }
-
-    #member-buttons button {
-        flex: 1;
-        min-width: 110px;
-        padding: 8px 6px !important;
-    }
-
-    #source-row label {
-        width: 100%;
-        text-align: center;
-    }
-
-    #data-source-select {
-        width: 100% !important;
-    }
-
-    .console-box {
-        padding: 12px;
-    }
-
-    .card {
-        padding: 14px;
-    }
-
-    .card h2 {
-        font-size: 1.25rem !important;
-    }
-
-    .card span[style*="font-size:1.5rem"] {
-        font-size: 1.2rem !important;
-    }
-
-    .initial-interest-counter {
-        text-align: center;
-    }
-
-    #initial-interest-submit {
-        min-height: 46px;
-        font-size: .9rem;
-    }
-}
 
 </style>
 </head>
@@ -418,12 +203,32 @@ canvas {
 <div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
     </div>
 </div>
-<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; none-direction:column; padding:20px;">
+<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px;">
     <div style="background:var(--panel); padding:40px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
         <h2 style="color:var(--gold); margin-bottom:20px;">دخول العضوية 🔑</h2>
         <input type="email" id="login-email" placeholder="البريد الإلكتروني" style="margin-bottom:15px;">
         <input type="password" id="login-pass" placeholder="كلمة السر" style="margin-bottom:20px;">
         <button onclick="handleLogin()" class="execute-btn" style="background:var(--green); color:white;">دخول النظام</button>
+<button type="button"
+        onclick="handleSignup()"
+        style="width:100%; margin-top:10px;
+               background:#1f3a5f; color:white;
+               border:none; padding:12px;
+               border-radius:6px; font-weight:bold;
+               cursor:pointer;">
+    إنشاء حساب جديد
+</button>
+
+<button type="button"
+        onclick="handlePasswordReset()"
+        style="width:100%; margin-top:10px;
+               background:#d29922; color:#161b22;
+               border:none; padding:12px;
+               border-radius:6px; font-weight:bold;
+               cursor:pointer;">
+    نسيت كلمة المرور؟
+</button>
+
 <button type="button"
         onclick="closeLoginScreen()"
         style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
@@ -854,14 +659,6 @@ canvas {
 
 </div>
         <div><label>رابط المصدر:</label><input type="text" id="in-url"></div>
-<div>
-    <label>ظهور البطاقة:</label>
-    <select id="in-visibility">
-        <option value="public">عامة — تظهر في المعرض</option>
-        <option value="private">خاصة — تظهر بالرابط السري فقط</option>
-    </select>
-</div>
-
     </div>
     <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">save</button>
 </section>
@@ -941,8 +738,6 @@ Market_Size_2: document.getElementById('in-market-2').value,
 Competition_2: document.getElementById('in-comp-2').value,
 Growth_2: document.getElementById('in-growth-2').value,
     SourceURL: document.getElementById('in-url').value,
-visibility: document.getElementById('in-visibility').value,
-
     created_at: new Date(),
 
     // ✅ السطر الجديد (أهم شيء)
@@ -954,52 +749,24 @@ if (editingItemId) {
     result = await _supabase
         .from('transactions')
         .update(payload)
-        .eq('id', editingItemId)
-        .select('id, share_token, visibility')
-        .single();
+        .eq('id', editingItemId);
 } else {
     result = await _supabase
         .from('transactions')
-        .insert([payload])
-        .select('id, share_token, visibility')
-        .single();
+        .insert([payload]);
 }
 
-const { data: savedCard, error } = result;
+const { error } = result;
 
-if (error) {
-    alert("فشل الحفظ: " + error.message);
-    return;
-}
-
-if (savedCard?.visibility === 'private' && savedCard.share_token) {
-    const privateLink =
-        `${window.location.origin}${window.location.pathname}?share=${savedCard.share_token}`;
-
-    try {
-        await navigator.clipboard.writeText(privateLink);
-        alert(
-            "تم الحفظ.\n\nتم نسخ الرابط السري إلى الحافظة.\nأرسله فقط إلى الشخص الذي تريد."
-        );
-    } catch {
-        prompt(
-            "انسخ هذا الرابط السري وأرسله للشخص المطلوب فقط:",
-            privateLink
-        );
+    if (!error) {
+    alert(editingItemId ? "تم تعديل البيانات بنجاح!" : "تم الحفظ بنجاح!");
+    editingItemId = null;
+        cache.supabase = null;  // إعادة التحميل
+        closeEntryForm();
+        toggleDataSource('supabase');
+    } else {
+        alert("فشل الحفظ: " + error.message);
     }
-} else {
-    alert(
-        editingItemId
-            ? "تم تعديل البطاقة بنجاح!"
-            : "تم حفظ البطاقة العامة بنجاح!"
-    );
-}
-
-editingItemId = null;
-cache.supabase = null;
-closeEntryForm();
-toggleDataSource('supabase');
-
 }
 function highlightSelectedText() {
     const textarea = document.getElementById('in-desc');
@@ -1008,7 +775,7 @@ function highlightSelectedText() {
     const end = textarea.selectionEnd;
 
     if (start === end) {
-        alert('حدد الجملة أو الكلمة أولًا ثم اضغط الزر');
+        alert('حدد الجملة أو الكلمة أولًا ثم اضغط زر التمييز');
         return;
     }
 
@@ -1058,43 +825,20 @@ function numberSelectedLines() {
 }
 
 // --- جلب البيانات (Supabase) ---
-async function fetchSupabaseBatch(
-    start = 0,
-    limit = batchSize,
-    ownerId = null
-) {
-    let query = _supabase
+async function fetchSupabaseBatch(start = 0, limit = batchSize) {
+    const { data, error } = await _supabase
         .from('transactions')
-        .select('*');
-
-    if (ownerId) {
-        query = query.or(
-            `visibility.eq.public,user_id.eq.${ownerId}`
-        );
-    } else {
-        query = query.eq(
-            'visibility',
-            'public'
-        );
-    }
-
-    const { data, error } = await query
-        .order('created_at', {
-            ascending: false
-        })
+        .select('*')
+        .order('created_at', { ascending: false })
         .range(start, start + limit - 1);
 
     if (error) {
-        console.error(
-            'Supabase read error:',
-            error
-        );
+        console.error('Supabase read error:', error);
         throw error;
     }
 
     return data || [];
 }
-
 async function loadInitialInterestCounts(items) {
     initialInterestCounts = {};
 
@@ -1153,12 +897,7 @@ async function toggleDataSource(source) {
         if (source === 'supabase') {
             let allData = [], start = 0, batch;
             do {
-                batch = await fetchSupabaseBatch(
-                              start,
-                              batchSize,
-                             window.currentUserId || null
-                             );
-
+                batch = await fetchSupabaseBatch(start, batchSize);
                 allData.push(...batch.filter(i => i && i.Niche));
                 start += batchSize;
             } while (batch.length === batchSize);
@@ -1257,9 +996,7 @@ const { data, error } = await _supabase
     .eq('Month', mon)
     .eq('Year', yr)
     .eq('DocType', doc)
-.eq('visibility', 'public')
-.order('created_at', { ascending:false });
-
+    .order('created_at', { ascending:false });
     if(error){
         console.error(error);
         alert("حدث خطأ أثناء جلب البيانات");
@@ -1376,47 +1113,10 @@ function render() {
                 style="flex:1; background:#21262d; color:#f85149; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
             🗑️ حذف
         </button>
-        ` : ''}
+    ` : ''}
 </div>
-
-${
-    item.visibility === 'private' &&
-    item.user_id === window.currentUserId
-        ? `
-        <div style="margin-top:14px;
-                    padding:10px;
-                    border:1px solid var(--gold);
-                    border-radius:8px;
-                    background:rgba(210,153,34,.10);
-                    text-align:center;">
-
-            <div style="color:var(--gold);
-                        font-weight:bold;
-                        font-size:.85rem;
-                        margin-bottom:8px;">
-                🔒 بطاقة خاصة — لا تظهر للعامة
-            </div>
-
-            <button type="button"
-                    onclick="copyPrivateLink(
-                        '${item.share_token}'
-                    )"
-                    style="width:100%;
-                           padding:9px;
-                           background:var(--gold);
-                           color:#161b22;
-                           border:none;
-                           border-radius:6px;
-                           cursor:pointer;
-                           font-weight:bold;">
-                🔗 نسخ الرابط الخاص
-            </button>
-        </div>
-        `
-        : ''
-}
 <div style="display:flex;
-            justify-content:right;
+            justify-content:center;
             align-items:center;
             margin-top:14px;
             padding:9px 12px;
@@ -1537,6 +1237,97 @@ async function handleLogin() {
         }, 500); 
     }
 }
+async function handleSignup() {
+    const email =
+        document.getElementById('login-email').value.trim();
+
+    const pass =
+        document.getElementById('login-pass').value;
+
+    const msg =
+        document.getElementById('login-msg');
+
+    if (!email || !pass) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'اكتب البريد الإلكتروني وكلمة مرورلحسابك ثم قم بفحص بريدك الالكترونى لتاكيد كلمة المرور .';
+        return;
+    }
+
+    if (pass.length < 6) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل.';
+        return;
+    }
+
+    msg.style.color = '#d29922';
+    msg.innerText = 'جاري إنشاء الحساب...';
+
+    const { error } =
+        await _supabase.auth.signUp({
+            email: email,
+            password: pass,
+            options: {
+                emailRedirectTo:
+                    window.location.origin +
+                    window.location.pathname
+            }
+        });
+
+    if (error) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'تعذر إنشاء الحساب: ' + error.message;
+        return;
+    }
+
+    msg.style.color = '#238636';
+    msg.innerText =
+        'تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد.';
+}
+async function handlePasswordReset() {
+    const email =
+        document.getElementById('login-email').value.trim();
+
+    const msg =
+        document.getElementById('login-msg');
+
+    if (!email) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'اكتب بريدك الإلكتروني أولًا.';
+        return;
+    }
+
+    msg.style.color = '#d29922';
+    msg.innerText =
+        'جاري إرسال رابط الاستعادة...';
+
+    const resetUrl =
+        window.location.origin +
+        window.location.pathname;
+
+    const { error } =
+        await _supabase.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo: resetUrl
+            }
+        );
+
+    if (error) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'تعذر إرسال الرابط: ' + error.message;
+        return;
+    }
+
+    msg.style.color = '#238636';
+    msg.innerText =
+        'تم إرسال رابط تغيير كلمة المرور إلى بريدك.';
+}
+
 function openLoginScreen() {
     document.getElementById('login-screen').style.display = 'flex';
 }
@@ -1567,79 +1358,10 @@ async function signInWithGoogle() {
         alert('تعذر التسجيل عبر Google: ' + error.message);
     }
 }
-async function openSharedCard(shareToken) {
-    const { data, error } = await _supabase.rpc(
-        'get_shared_transaction',
-        {
-            p_share_token: shareToken
-        }
-    );
-
-    if (error || !data) {
-        document.getElementById('main-view').innerHTML =
-            '<div class="loading">الرابط غير صحيح أو البطاقة لم تعد متاحة.</div>';
-        return;
-    }
-
-    const card = typeof data === 'string'
-        ? JSON.parse(data)
-        : data;
-
-    db = [card];
-    fullDataStore = [card];
-    renderIndex = 0;
-
-    const sidebar = document.querySelector('.sidebar');
-
-    if (sidebar) {
-        sidebar.style.display = 'none';
-    }
-
-    const main = document.getElementById('main-content-area');
-
-    if (main) {
-        main.style.display = 'block';
-    }
-
-    await loadInitialInterestCounts([card]);
-
-    document.getElementById('main-view').innerHTML = '';
-    render();
-}
-async function copyPrivateLink(
-    shareToken
-) {
-    if (!shareToken) {
-        alert('لا يوجد رابط خاص لهذه البطاقة.');
-        return;
-    }
-
-    const privateLink =
-        'https://abdoelsoltan506-jpg.github.io/' +
-        'opportunity-radar/?share=' +
-        shareToken;
-
-    try {
-        await navigator.clipboard.writeText(
-            privateLink
-        );
-
-        alert(
-            'تم نسخ الرابط الخاص بنجاح.'
-        );
-    } catch (error) {
-        prompt(
-            'انسخ الرابط الخاص:',
-            privateLink
-        );
-    }
-}
 
 // --- فحص المستخدم عند فتح الصفحة ---
 async function checkUserOnLoad() {
     const { data: { session } } = await _supabase.auth.getSession();
-    window.currentUserId = 
-           session?.user?.id || null;
 
     // السماح للجميع برؤية الرادار
     document.getElementById('login-screen').style.display = 'none';
@@ -1693,18 +1415,8 @@ async function checkUserOnLoad() {
     if (sourceSelect) sourceSelect.value = 'supabase';
 
     // تحميل البطاقات للجميع
-    const shareToken =
-    new URLSearchParams(window.location.search).get('share');
-
-if (shareToken) {
-    await openSharedCard(shareToken);
-    return;
-}
-
-// تحميل البطاقات العامة فقط
-toggleDataSource('supabase');
-loadMembersList();
-
+    toggleDataSource('supabase');
+    loadMembersList();
 }
 async function loadMembersList() {
     const box = document.getElementById('members-box');
@@ -2082,7 +1794,9 @@ async function saveNewPassword() {
     }
 
     if (newPassword.length < 6) {
-        msg.innerText = "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل";
+        msg.innerText =
+    "افتح رابط التحقق من بريدك الإلكتروني أولًا";
+
         return;
     }
 
