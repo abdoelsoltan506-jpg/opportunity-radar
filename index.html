@@ -1,3548 +1,2491 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>مركز مستندات الأعمال</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar Enterprise V6 - Optimized</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root {
-    --navy: #17324d;
-    --blue: #2563eb;
-    --bg: #f4f7fb;
-    --white: #ffffff;
-    --text: #1f2937;
-    --muted: #6b7280;
-    --line: #dbe3ee;
-    --green: #16845b;
-    --red: #b42318;
-    --orange: #a76500;
+/* 1. نافذة التحليل (مخفية افتراضياً) */
+#analysis-modal {
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(0, 0, 0, 0.9); 
+    z-index: 99999; 
+    align-items: center; 
+    justify-content: center;
 }
+
+/* 2. حاوية العداد (نصف الدائرة) */
+.gauge-container { 
+    position: relative; 
+    width: 180px; height: 90px; 
+    overflow: hidden; 
+    margin: 20px auto; 
+}
+
+.gauge-background { 
+    width: 100%; height: 100%; 
+    background: conic-gradient(from -90deg at 50% 100%, #f85149, #d29922, #238636); 
+    border-radius: 180px 180px 0 0; 
+}
+
+.gauge-cover { 
+    position: absolute; top: 10px; left: 10px; width: 160px; height: 80px; 
+    background: #161b22; border-radius: 160px 160px 0 0; 
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px;
+}
+
+.gauge-needle { 
+    position: absolute; bottom: 0; left: 50%; width: 3px; height: 80px; 
+    background: #991b1b; transform-origin: bottom center; 
+    transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+    :root {
+        --bg: #d1d5db; --panel: #040c7d; --accent: #58a6ff;
+        --gold: #d29922; --green: #238636;
+    }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #a6a9ae; margin:0; }
+    header { background: var(--panel); padding:10px 5%; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000; }
+    .sys-window { background:#530202; border:1px solid var(--accent); width:450px; height:40px; overflow:hidden; position:relative; border-radius:4px; }
+    .ticker { position:absolute; white-space:nowrap; color:#f11197; font-family:monospace; font-size:0.95rem; line-height:35px; left:-100%; animation:scroll-right 40s linear infinite; }
+    @keyframes scroll-right { 0%{left:-100%;} 100%{left:100%;} }
+    main { display:flex; gap:20px; padding:20px; max-width:1600px; margin:auto; }
+    .sidebar { width:280px; flex-shrink:0; }
+    .console-box { background:var(--panel); border:1px solid #30363d; padding:20px; border-radius:10px; position:sticky; top:80px; }
+    label { font-size:0.8rem; color:var(--gold); display:block; margin-bottom:5px; font-weight:bold; }
+    select,input,textarea { width:100%; padding:10px; margin-bottom:15px; background:#d1d5db; color:#991b1b; border:1px solid var(--accent); border-radius:6px; }
+    .execute-btn { width:100%; background:var(--gold); color:#d1d5db; border:none; padding:15px; border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s; }
+    .card { background:#fff; border:1px solid #30363d; border-radius:15px; padding:35px; margin-bottom:30px; border-right:15px solid var(--green); min-height:400px; }
+    .big-star { font-size:1.6rem; color:#ff9d00; font-weight:900; display:inline-block; margin:10px 0; text-shadow:0 0 10px rgba(255,157,0,0.3); }
+    .desc-box { background:#506178; padding:25px; border-radius:10px; line-height:2.2; font-size:1.25rem; margin:20px 0; border:1px solid #21262d; }
+    .stats-grid { 
+    display:grid; 
+    grid-template-columns:repeat(2,1fr); 
+    gap:15px; 
+}
+    .stat-item { background:#506178; padding:15px; border-radius:8px; text-align:center; border:1px solid #30363d; }
+    .stat-label { color:var(--accent); font-size:0.8rem; display:block; margin-bottom:5px; }
+    .score-bar-bg { background:#30363d; height:12px; border-radius:10px; margin-top:20px; overflow:hidden; }
+    .score-bar-fill { height:100%; transition:width 1s; }
+    .loading { text-align:center; padding:100px; font-size:1.2rem; color:var(--gold); }
+
+    /* --- لمبة الحالة --- */
+    .status-indicator { display:inline-flex; align-items:center; gap:8px; background:#d1d5db; padding:5px 12px; border-radius:20px; border:1px solid #333; margin-top:5px; }
+    .led-red { width:10px; height:10px; background-color:#f85149; border-radius:50%; box-shadow:0 0 10px #f85149; animation:blink-red 1s infinite; }
+    .led-green { width:10px; height:10px; background-color:#238636; border-radius:50%; box-shadow:0 0 10px #238636; animation:pulse-green 2s infinite; }
+    @keyframes blink-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    @keyframes pulse-green { 0%{box-shadow:0 0 0 0 rgba(35,134,54,0.7);} 70%{box-shadow:0 0 0 10px rgba(35,134,54,0);} 100%{box-shadow:0 0 0 0 rgba(35,134,54,0);} }
+.display-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 30px;
+}
+
+.card {
+    display: block;
+    position: static;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    flex: 0 0 auto;
+}
+/* ============================= */
+/* تنسيق الهاتف والشاشات الصغيرة */
+/* ============================= */
 
 * {
     box-sizing: border-box;
 }
 
+html,
 body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Tahoma, Arial, sans-serif;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: var(--navy);
-    color: white;
-    padding: 20px;
+img,
+canvas {
+    max-width: 100%;
 }
 
-
-.header-inner {
-    max-width: 1200px;
-    margin: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 1.4rem;
-}
-
-header p {
-    margin: 6px 0 0;
-    color: #c9d7e7;
-    font-size: 0.85rem;
-}
-
-#connection {
-    font-size: 0.8rem;
-    color: #b9f6d3;
-}
-
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px 14px;
-}
-
-.panel {
-    background: white;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 17px;
-    margin-bottom: 18px;
-    box-shadow: 0 3px 14px #17324d12;
-}
-
-.panel h2 {
-    color: var(--navy);
-    font-size: 1.05rem;
-    margin: 0 0 14px;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 11px;
-}
-
-.full-width {
-    grid-column: span 2;
-}
-
-label {
-    display: block;
-    color: var(--muted);
-    font-size: 0.73rem;
-    margin-bottom: 5px;
-}
-
-input,
-select,
-textarea,
-button {
-    font: inherit;
-}
-
-input,
-select,
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: white;
-    color: var(--text);
-}
-
-textarea {
-    min-height: 70px;
-    resize: vertical;
-}
-
-button {
-    cursor: pointer;
-}
-
-.primary-button,
-.secondary-button {
-    border: 0;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-weight: bold;
-}
-
-.primary-button {
-    background: var(--blue);
-    color: white;
-}
-
-.secondary-button {
-    background: #edf2f7;
-    color: var(--navy);
-}
-
-.actions {
-    display: flex;
-    gap: 9px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 14px;
-}
-
-.message {
-    font-size: 0.8rem;
-}
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 15px;
-}
-
-.card {
-    background: white;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 4px 15px #17324d12;
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.document-type {
-    color: var(--navy);
-    font-weight: bold;
-    font-size: 1.05rem;
-}
-
-.document-number {
-    color: var(--muted);
-    font-size: 0.75rem;
-    margin-top: 5px;
-}
-
-.status {
-    background: #e8f5ef;
-    color: var(--green);
-    border-radius: 20px;
-    padding: 5px 9px;
-    height: fit-content;
-    font-size: 0.72rem;
-    white-space: nowrap;
-}
-
-.status-review {
-    background: #fff4dd;
-    color: var(--orange);
-}
-
-.status-closed {
-    background: #fbe9e7;
-    color: var(--red);
-}
-
-.card-data {
-    border-top: 1px solid var(--line);
-    margin-top: 14px;
-    padding-top: 12px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 11px;
-    font-size: 0.82rem;
-}
-
-.card-data span,
-.details span {
-    display: block;
-    color: var(--muted);
-    font-size: 0.7rem;
-    margin-bottom: 3px;
-}
-
-.amount {
-    color: var(--blue);
-    font-weight: bold;
-}
-
-.details-button {
-    width: 100%;
-    border: 0;
-    border-radius: 8px;
-    padding: 10px;
-    margin-top: 14px;
-    background: #edf3ff;
-    color: #1d4ed8;
-}
-
-.empty {
-    background: white;
-    border: 1px dashed var(--line);
-    border-radius: 14px;
-    padding: 35px;
-    text-align: center;
-    color: var(--muted);
-    grid-column: 1 / -1;
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 18px;
-}
-
-.pagination button {
-    border: 1px solid var(--line);
-    background: white;
-    border-radius: 7px;
-    padding: 8px 15px;
-}
-
-.pagination button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.login-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    background: #0b1726dd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.login-box {
-    background: white;
-    width: min(390px, 100%);
-    border-radius: 15px;
-    padding: 25px;
-}
-
-.login-box h2 {
-    color: var(--navy);
-    margin-top: 0;
-}
-
-.login-box input {
-    margin-bottom: 12px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-dialog {
-    border: 0;
-    border-radius: 15px;
-    width: min(650px, 95%);
-    padding: 0;
-}
-
-dialog::backdrop {
-    background: #0b1726aa;
-}
-
-.modal {
-    padding: 22px;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 12px;
-}
-
-.close-button {
-    border: 0;
-    border-radius: 7px;
-    padding: 7px 11px;
-}
-
-.details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin: 18px 0;
-}
-
-.items {
-    border-top: 1px solid var(--line);
-    padding-top: 14px;
-}
-
-.item {
-    display: flex;
-    justify-content: space-between;
-    padding: 9px 0;
-    border-bottom: 1px solid #edf1f6;
-}
-
-@media (max-width: 760px) {
-    .form-grid {
-        grid-template-columns: 1fr 1fr;
+@media (max-width: 900px) {
+    header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        position: relative;
     }
 
-    .full-width {
-        grid-column: span 2;
+    header > div {
+        width: 100%;
     }
-}
 
-@media (max-width: 500px) {
-    .header-inner {
+    .sys-window {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #member-buttons {
+        width: 100% !important;
+        align-items: stretch !important;
+    }
+
+    #member-buttons > div {
+        justify-content: center;
+        align-items: center;
+    }
+
+    #header-controls {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #radar-buttons {
+        width: 100% !important;
+    }
+
+    #source-row {
+        position: static !important;
+        width: 100%;
+        display: flex !important;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    main {
+        flex-direction: column;
+        width: 100%;
+        padding: 12px;
+        gap: 15px;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .console-box {
+        position: static;
+        width: 100%;
+        padding: 15px;
+    }
+
+    .display-area {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .card {
+        width: 100%;
+        padding: 18px;
+        margin-bottom: 18px;
+        border-right-width: 8px;
+        min-height: auto;
+    }
+
+    .card h2 {
+        font-size: 1.45rem !important;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+
+    .card > a,
+    .card > button {
         display: block;
+        width: 100%;
+        margin-top: 8px;
+        text-align: center;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
+    .card > div[style*="display:flex"] {
+        flex-wrap: wrap;
     }
 
-    .full-width {
-        grid-column: auto;
+    .card > div[style*="display:flex"] button {
+        min-width: 100%;
     }
 
-    .details {
-        grid-template-columns: 1fr;
+    .desc-box {
+        padding: 15px;
+        font-size: 1rem;
+        line-height: 2;
+        overflow-wrap: anywhere;
     }
-}
-.item-editor-row input { min-width:0; }
-@media (max-width:600px) { .item-editor-row { grid-template-columns:1fr 1fr !important; } .item-editor-row > div:first-child { grid-column:1 / -1; } .item-editor-row .remove-item-button { grid-column:1 / -1; width:100%; } }
 
-.item-name-input {
-    width:100%;
-    min-height:74px;
-    resize:vertical;
-    line-height:1.7;
-    white-space:pre-wrap;
-    overflow-wrap:anywhere;
-}
+    #initial-interest-modal,
+    #analysis-modal,
+    #password-setup-modal {
+        padding: 10px !important;
+    }
 
-#notes {
-    min-height:130px;
-    resize:vertical;
-    line-height:1.8;
-    white-space:pre-wrap;
-    overflow-wrap:anywhere;
-}
+    #initial-interest-modal > div,
+    #analysis-modal > div,
+    #password-setup-modal > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 18px !important;
+    }
 
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+        font-size: 16px;
+    }
 
-.details-items-wrap {
-    margin-top:16px;
-    border:1px solid var(--line);
-    border-radius:10px;
-    overflow-x:auto;
-    background:#fff;
-}
-
-.details-items-table {
-    width:100%;
-    min-width:560px;
-    border-collapse:collapse;
-    font-size:.84rem;
-    direction:rtl;
-}
-
-.details-items-table th {
-    padding:11px 10px;
-    background:#f1f5f9;
-    color:var(--navy);
-    font-size:.76rem;
-    font-weight:800;
-    text-align:right;
-    white-space:nowrap;
-    border-bottom:2px solid #dbe4ee;
-}
-
-.details-items-table td {
-    padding:12px 10px;
-    color:var(--text);
-    vertical-align:top;
-    border-bottom:1px solid #e5eaf0;
-    white-space:pre-line;
-    overflow-wrap:anywhere;
-}
-
-.details-items-table tbody tr:last-child td {
-    border-bottom:0;
-}
-
-.details-items-table .item-index {
-    width:42px;
-    color:var(--muted);
-    text-align:center;
-}
-
-.details-items-table .item-number,
-.details-items-table .item-quantity,
-.details-items-table .item-price,
-.details-items-table .item-total {
-    text-align:right;
-    white-space:nowrap;
-    direction:ltr;
-}
-
-.details-items-table .item-quantity,
-.details-items-table .item-price,
-.details-items-table .item-total {
-    font-variant-numeric:tabular-nums;
-}
-
-.details-items-table .item-total {
-    color:var(--blue);
-    font-weight:800;
-}
-
-.details-total-box {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    margin-top:12px;
-    padding:13px 15px;
-    background:#eef6ff;
-    border:1px solid #cfe1f5;
-    border-radius:10px;
-}
-
-.details-total-box strong {
-    color:var(--blue);
-    font-size:1.15rem;
-    direction:ltr;
-}
-
-@media (max-width:600px) {
-    .details-items-table {
-        min-width:520px;
+    .gauge-container {
+        transform: scale(.85);
+        transform-origin: center;
+        margin: 5px auto;
     }
 }
 
+@media (max-width: 520px) {
+    header h2 {
+        font-size: 1.15rem !important;
+        text-align: center;
+    }
 
-#header-text, #conclusion-text, #footer-text { min-height:78px; resize:vertical; line-height:1.8; white-space:pre-line; }
-.print-header, .print-footer, .print-conclusion { white-space:pre-line; line-height:1.9; overflow-wrap:anywhere; }
-.print-header { margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid var(--navy); text-align:center; font-weight:bold; }
-.print-footer { margin-top:18px; padding-top:12px; border-top:2px solid var(--navy); text-align:center; color:var(--muted); font-size:.8rem; }
-.print-conclusion { margin-top:18px; padding:12px 0; text-align:right; font-weight:bold; }
-.amount-words-box { margin-top:12px; padding:12px 15px; background:#f8fafc; border:1px dashed #b9c9d9; border-radius:9px; line-height:1.9; }
-@media print { body { background:#fff !important; } header, .panel, .pagination, #cards, .modal-header, .print-button { display:none !important; } dialog#details-dialog { display:block !important; position:static; width:100%; max-width:none; border:0; padding:0; } dialog#details-dialog::backdrop { display:none; } dialog#details-dialog .modal { padding:0; box-shadow:none; } .print-header, .print-footer, .print-conclusion { display:block !important; } }
+    .status-indicator {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .ticker {
+        font-size: .75rem;
+    }
+
+    #member-buttons button {
+        flex: 1;
+        min-width: 110px;
+        padding: 8px 6px !important;
+    }
+
+    #source-row label {
+        width: 100%;
+        text-align: center;
+    }
+
+    #data-source-select {
+        width: 100% !important;
+    }
+
+    .console-box {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .card h2 {
+        font-size: 1.25rem !important;
+    }
+
+    .card span[style*="font-size:1.5rem"] {
+        font-size: 1.2rem !important;
+    }
+
+    .initial-interest-counter {
+        text-align: center;
+    }
+
+    #initial-interest-submit {
+        min-height: 46px;
+        font-size: .9rem;
+    }
+}
+
 </style>
 </head>
-
 <body>
+<div id="initial-interest-modal"
+     style="display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.88); z-index:100001;
+            align-items:center; justify-content:center; padding:20px;">
 
-<!-- نافذة تسجيل الدخول -->
-<div id="login-screen" class="login-screen">
-    <div class="login-box">
-        <h2>دخول مركز المستندات</h2>
+    <div style="background:var(--panel); width:100%; max-width:520px;
+                padding:25px; border-radius:15px;
+                border:2px solid var(--gold);">
 
-        <label>البريد الإلكتروني</label>
-        <input id="login-email" type="email" placeholder="name@gmail.com">
-
-        <label>كلمة المرور</label>
-        <input id="login-password" type="password">
-
-        <button
-    class="primary-button"
-    style="width:100%;"
-    onclick="loginUser()">
-    دخول
-</button>
-
-<div
-    style="
-        display:flex;
-        justify-content:space-between;
-        gap:8px;
-        margin-top:12px;
-        flex-wrap:wrap;
-    "
->
-    <button
-        type="button"
-        class="secondary-button"
-        style="flex:1; font-size:.82rem;"
-        onclick="openSignupWindow()"
-    >
-        إنشاء حساب
-    </button>
-
-    <button
-        type="button"
-        class="secondary-button"
-        style="flex:1; font-size:.82rem;"
-        onclick="openPasswordRecoveryWindow()"
-    >
-        نسيت كلمة المرور؟
-    </button>
-</div>
-
-<p id="login-message" class="message"></p>
-
-
-        <p id="login-message" class="message"></p>
-    </div>
-</div>
-<div
-    id="signup-window"
-    class="hidden"
-    style="
-        position:fixed;
-        inset:0;
-        z-index:40;
-        background:#0b1726cc;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-    "
->
-    <div
-        style="
-            background:#ffffff;
-            width:min(420px,100%);
-            border-radius:15px;
-            padding:24px;
-            box-shadow:0 20px 70px #0005;
-        "
-    >
-        <h2 style="margin-top:0;color:#17324d;">
-            إنشاء حساب جديد
-        </h2>
-
-        <label for="signup-email">
-            البريد الإلكتروني
-        </label>
-
-        <input
-            id="signup-email"
-            type="email"
-            placeholder="name@gmail.com"
-        >
-
-        <label for="signup-password">
-            كلمة المرور
-        </label>
-
-        <input
-            id="signup-password"
-            type="password"
-            placeholder="6 أحرف أو أكثر"
-        >
-
-        <label for="signup-password-confirm">
-            تأكيد كلمة المرور
-        </label>
-
-        <input
-            id="signup-password-confirm"
-            type="password"
-            placeholder="أعد كتابة كلمة المرور"
-        >
-
-        <button
-            class="primary-button"
-            style="width:100%;margin-top:10px;"
-            type="button"
-            onclick="signUpUser()"
-        >
-            إنشاء الحساب
+        <button type="button"
+                onclick="closeInitialInterestModal()"
+                style="float:left; background:none; border:none;
+                       color:white; font-size:1.3rem; cursor:pointer;">
+            ✕
         </button>
 
-        <button
-            class="secondary-button"
-            style="width:100%;margin-top:10px;"
-            type="button"
-            onclick="closeSignupWindow()"
-        >
-            رجوع
-        </button>
-
-        <p
-            id="signup-message"
-            class="message"
-        ></p>
-    </div>
-</div>
-<div
-    id="recovery-window"
-    class="hidden"
-    style="
-        position:fixed;
-        inset:0;
-        z-index:40;
-        background:#0b1726cc;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-    "
->
-    <div
-        style="
-            background:#ffffff;
-            width:min(420px,100%);
-            border-radius:15px;
-            padding:24px;
-            box-shadow:0 20px 70px #0005;
-        "
-    >
-        <h2 style="margin-top:0;color:#17324d;">
-            استعادة كلمة المرور
+        <h2 style="color:var(--gold); margin-top:0;">
+            إرسال اهتمام مبدئي
         </h2>
 
-        <p style="color:#6b7280;font-size:.85rem;">
-            اكتب بريدك الإلكتروني وسنرسل لك رابطًا لتعيين كلمة مرور جديدة.
+        <p id="initial-interest-niche"
+           style="color:white; font-weight:bold;">
         </p>
 
-        <label for="recovery-email">
-            البريد الإلكتروني
+        <input type="hidden" id="initial-interest-transaction-id">
+
+        <label>اكتب اهتمامك — الحد الأقصى 20 كلمة:</label>
+
+        <textarea id="initial-interest-text"
+                  rows="7"
+                  maxlength="500"
+                  placeholder="يمكنك كتابة كلمة واحدة أو أكثر..."
+                  oninput="validateInitialInterest()"></textarea>
+
+        <div id="initial-interest-counter"
+             style="color:var(--gold); font-size:.8rem; margin-top:-10px;">
+            0 / 20 كلمة
+        </div>
+
+        <label style="margin-top:15px;">
+            Gmail — اختياري:
         </label>
 
-        <input
-            id="recovery-email"
-            type="email"
-            placeholder="name@gmail.com"
-        >
+        <input type="email"
+                 id="initial-interest-gmail"
+                placeholder="example@gmail.com"
+              oninput="validateInitialInterest()">
 
-        <button
-            class="primary-button"
-            style="width:100%;margin-top:10px;"
-            type="button"
-            onclick="sendPasswordRecovery()"
-        >
-            إرسال رابط الاستعادة
+
+        <label>
+            رقم واتساب — اختياري:
+        </label>
+
+        <input type="tel"
+              id="initial-interest-whatsapp"
+             placeholder="رقم واتساب"
+            oninput="validateInitialInterest()">
+
+
+        <button id="initial-interest-submit"
+                type="button"
+                disabled
+                onclick="submitInitialInterest()"
+                style="width:100%; background:#777;
+                       color:white; border:none; padding:12px;
+                       border-radius:6px; font-weight:bold;
+                       cursor:not-allowed;">
+            إرسال اهتمام مبدئي
         </button>
+<p id="initial-interest-result"
+   style="margin-top:12px; text-align:center; font-weight:bold;">
+</p>
 
-        <button
-            class="secondary-button"
-            style="width:100%;margin-top:10px;"
-            type="button"
-            onclick="closePasswordRecoveryWindow()"
-        >
-            رجوع
-        </button>
 
-        <p
-            id="recovery-message"
-            class="message"
-        ></p>
     </div>
 </div>
-<div
-    id="password-update-window"
-    class="hidden"
-    style="
-        position:fixed;
-        inset:0;
-        z-index:50;
-        background:#0b1726cc;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-    "
->
-    <div
-        style="
-            background:#ffffff;
-            width:min(420px,100%);
-            border-radius:15px;
-            padding:24px;
-            box-shadow:0 20px 70px #0005;
-        "
-    >
-        <h2 style="margin-top:0;color:#17324d;">
-            تعيين كلمة مرور جديدة
+
+<div id="analysis-modal">
+    <div style="background:#161b22; width:90%; max-width:450px; padding:30px; border-radius:15px; border:2px solid #d29922; text-align:center; position:relative;">
+        
+        <button onclick="closeAnalysis()" style="position:absolute; top:10px; left:10px; background:none; border:none; color:#888; cursor:pointer; font-size:1.2rem;">✕</button>
+        
+        <h2 id="modal-title" style="color:#58a6ff; margin-bottom:10px;">--</h2>
+        
+        <div class="gauge-container">
+    <div class="gauge-background"></div>
+    <div class="gauge-cover">
+        <span id="modal-score" style="font-size:1.8rem; font-weight:800; color:#991b1b;">0%</span>
+    </div>
+    <div id="modal-needle" class="gauge-needle"></div>
+</div>
+
+<div style="height: 200px; width: 100%; margin: 20px 0;">
+    <canvas id="opportunityChart"></canvas>
+</div>
+
+<div id="modal-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+    </div>
+</div>
+<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; none-direction:column; padding:20px;">
+    <div style="background:var(--panel); padding:40px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
+        <h2 style="color:var(--gold); margin-bottom:20px;">دخول العضوية 🔑</h2>
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني" style="margin-bottom:15px;">
+        <input type="password" id="login-pass" placeholder="كلمة السر" style="margin-bottom:20px;">
+        <button onclick="handleLogin()" class="execute-btn" style="background:var(--green); color:white;">دخول النظام</button>
+<button type="button"
+        onclick="handleSignup()"
+        style="width:100%; margin-top:10px;
+               background:#1f3a5f; color:white;
+               border:none; padding:12px;
+               border-radius:6px; font-weight:bold;
+               cursor:pointer;">
+    إنشاء حساب جديد
+</button>
+
+<button type="button"
+        onclick="handlePasswordReset()"
+        style="width:100%; margin-top:10px;
+               background:#d29922; color:#161b22;
+               border:none; padding:12px;
+               border-radius:6px; font-weight:bold;
+               cursor:pointer;">
+    نسيت كلمة المرور؟
+</button>
+
+<button type="button"
+        onclick="closeLoginScreen()"
+        style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
+    رجوع
+</button>
+      <p id="login-msg" style="color:#f85149; margin-top:15px; font-size:0.8rem;"></p>
+    </div>
+</div>
+<div id="password-setup-modal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+
+    <div style="background:var(--panel); padding:30px; border-radius:15px; border:2px solid var(--gold); width:100%; max-width:400px; text-align:center;">
+
+        <h2 style="color:var(--gold); margin-bottom:20px;">
+            إنشاء كلمة مرور للموقع
         </h2>
 
-        <label for="new-password">
-            كلمة المرور الجديدة
-        </label>
+        <p style="color:white; font-size:0.9rem; margin-bottom:15px;">
+            أنشئ كلمة مرور لاستخدامها في تسجيل الدخول لاحقًا
+        </p>
 
-        <input
-            id="new-password"
-            type="password"
-            placeholder="6 أحرف أو أكثر"
-        >
+        <input type="password"
+               id="new-password"
+               placeholder="كلمة المرور الجديدة"
+               style="margin-bottom:15px;">
 
-        <label for="new-password-confirm">
-            تأكيد كلمة المرور
-        </label>
+        <input type="password"
+               id="confirm-password"
+               placeholder="تأكيد كلمة المرور"
+               style="margin-bottom:15px;">
 
-        <input
-            id="new-password-confirm"
-            type="password"
-            placeholder="أعد كتابة كلمة المرور"
-        >
-
-        <button
-            class="primary-button"
-            style="width:100%;margin-top:10px;"
-            type="button"
-            onclick="updateUserPassword()"
-        >
+        <button type="button"
+                onclick="saveNewPassword()"
+                style="width:100%; background:var(--green); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
             حفظ كلمة المرور
         </button>
 
-        <p
-            id="password-update-message"
-            class="message"
-        ></p>
-    </div>
-</div>
+        <button type="button"
+                onclick="closePasswordSetup()"
+                style="width:100%; margin-top:10px; background:#30363d; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
+            رجوع
+        </button>
 
-<div
-    id="company-window"
-    class="hidden"
-    style="
-        position:fixed;
-        inset:0;
-        z-index:30;
-        background:#0b1726cc;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-    "
->
-    <div
-        style="
-            background:#ffffff;
-            width:min(420px,100%);
-            border-radius:15px;
-            padding:24px;
-            box-shadow:0 20px 70px #0005;
-        "
-    >
-        <h2 style="margin-top:0;color:#17324d;">
-            إنشاء شركة جديدة
-        </h2>
-
-        <p style="color:#6b7280;font-size:.85rem;">
-            اكتب اسم الشركة التي تريد إنشاءها.
+        <p id="password-setup-msg"
+           style="color:#f85149; margin-top:15px; font-size:0.8rem;">
         </p>
 
-        <label for="new-company-name">
-            اسم الشركة
-        </label>
-
-        <input
-            id="new-company-name"
-            type="text"
-            placeholder="مثال: شركة النور"
-        >
-
-        <div
-            style="
-                display:flex;
-                gap:8px;
-                margin-top:14px;
-            "
-        >
-            <button
-                id="save-company-button"
-                class="primary-button"
-                type="button"
-            >
-                متابعة
-            </button>
-
-            <button
-                id="close-company-button"
-                class="secondary-button"
-                type="button"
-            >
-                إغلاق
-            </button>
-        </div>
-
-        <p
-            id="company-window-message"
-            class="message"
-        ></p>
     </div>
 </div>
-<div
-    id="employees-window"
-    class="hidden"
-    style="
-        position:fixed;
-        inset:0;
-        z-index:30;
-        background:#0b1726cc;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-    "
->
-    <div
-        style="
-            background:#ffffff;
-            width:min(460px,100%);
-            max-height:90vh;
-            overflow:auto;
-            border-radius:15px;
-            padding:24px;
-            box-shadow:0 20px 70px #0005;
-        "
-    >
-        <h2 style="margin-top:0;color:#17324d;">
-            إدارة الموظفين
-        </h2>
-
-        <p style="color:#6b7280;font-size:.85rem;">
-            أضف مستخدمًا موجودًا في النظام إلى شركتك.
-        </p>
-
-        <label for="employee-email">
-            البريد الإلكتروني
-        </label>
-
-        <input
-            id="employee-email"
-            type="email"
-            placeholder="employee@example.com"
-        >
-
-        <label for="employee-role">
-            الصلاحية
-        </label>
-
-        <select id="employee-role">
-            <option value="member">
-                موظف
-            </option>
-
-            <option value="admin">
-                مدير
-            </option>
-        </select>
-
-        <div
-            style="
-                display:flex;
-                gap:8px;
-                margin-top:14px;
-            "
-        >
-            <button
-                id="add-employee-button"
-                class="primary-button"
-                type="button"
-            >
-                إضافة الموظف
-            </button>
-
-            <button
-                id="close-employees-button"
-                class="secondary-button"
-                type="button"
-            >
-                إغلاق
-            </button>
-        </div>
-<div
-    id="employees-list"
-    style="
-        margin-top:20px;
-        border-top:1px solid #e5e7eb;
-        padding-top:14px;
-    "
->
-    <div
-        style="
-            color:#6b7280;
-            font-size:.85rem;
-        "
-    >
-        لم يتم تحميل الموظفين بعد.
-    </div>
-</div>
-
-        <p
-            id="employees-window-message"
-            class="message"
-        ></p>
-    </div>
-</div>
-
 <header>
-    <div class="header-inner">
-        <div>
-            <h1>مركز مستندات الأعمال</h1>
-            <p>إدارة وأرشفة عمليات الشركة في بطاقات واضحة</p>
+    <div>
+        <h2 style="margin:0; color:var(--accent);">RADAR_ENTERPRISE</h2>
+        <div class="status-indicator">
+            <div id="led-bulb" class="led-red"></div>
+            <span id="status-text" style="font-size:0.7rem; font-weight:bold; color:#f85149;">OFFLINE</span>
         </div>
+        <div class="sys-window">
+        <div class="ticker" id="ticker-stream">INITIALIZING...</div>
+    </div>
+<div id="member-buttons" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
 
-        <div>
-    <span id="connection">جاري الاتصال...</span>
-<br>
+    <div id="user-email-badge"
+         style="display:none; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); padding:4px 10px; border-radius:20px; font-size:0.7rem; font-weight:bold; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+    </div>
 
-<span
-    id="company-name"
-    style="
-        color:#dbeafe;
-        font-size:.75rem;
-        font-weight:bold;
-    "
-></span>
+    <div style="display:flex; gap:5px; flex-wrap:wrap;">
+        <button id="subscribe-button" onclick="signInWithGoogle()"
+                style="background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+            اشتراك ⭐
+        </button>
 
-<br>
+        <button id="login-button" onclick="openLoginScreen()"
+                style="background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+            تسجيل الدخول 🔑
+        </button>
 
-<span
-    id="company-role"
-    style="
-        color:#bfdbfe;
-        font-size:.7rem;
-    "
-></span>
+        <button id="password-button" onclick="openPasswordSetup()"
+                style="display:none; background:#d29922; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+            تجديد كلمة المرور 🔐
+        </button>
 
-    <button
-        id="create-company-button"
-        class="secondary-button"
-        type="button">
-        إنشاء شركة
+        <button id="logout-button" onclick="handleLogout()"
+                style="display:none; background:#f85149; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">
+            EXITE🚪
+        </button>
+    </div>
+</div>
+<div id="header-controls"
+     style="width:100%; display:
+; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+
+    <div id="radar-buttons"
+     style="width:100%; display:flex; align-items:center; gap:5px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+      </div>
+
+</div>
+<div id="source-row"
+     style="position:absolute; left:0; bottom:8px; display:flex; align-items:center; gap:6px;">
+    
+<button id="nav-entry"
+            onclick="openEntryForm()"
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+        إدخال بيانات
     </button>
-<button
-    id="manage-employees-button"
-    class="secondary-button"
-    type="button">
-    إدارة الموظفين
+<button id="nav-back"
+            onclick="closeEntryForm()"
+            style="display:none; background:#238636; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold; white-space:nowrap;"
+            disabled>
+        BAKE
+    </button>
+<button onclick="switchToMode('today')" id="btn-mode-today"
+        style="background:#238636; color:white; border:none; padding:4px 12px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap; margin-top:5px;">
+    <div id="today-count" style="font-size:0.75rem; color:var(--gold); margin-top:5px;">عمليات اليوم: 0</div>
 </button>
-
-    <button
-        id="logout-button"
-        class="secondary-button hidden"
-        onclick="logoutUser()">
-        خروج
-    </button>
-</div>
-
+<label style="margin:0; color:var(--gold);">المصدر:</label>
+    <select id="data-source-select" onchange="
+(this.value)"
+            style="width:140px; padding:4px 8px; margin:0; background:#d1d5db; color:#991b1b; border:1px solid var(--gold); border-radius:6px; font-size:0.75rem;">
+        <option value="supabase" selected>Core Engine</option>
+    </select>
     </div>
+</div>
 </header>
-
-<main class="container">
-
-<!-- إدخال مستند -->
-<section id="input-panel" class="panel">
-
-    <h2>إدخال مستند جديد</h2>
-
-    <div class="form-grid">
-
-        <div>
-            <label>نوع المستند</label>
-            <select id="document-type">
-                <option>فاتورة</option>
-                <option>عرض سعر</option>
-                <option>خطاب ضمان</option>
-                <option>أمر إسناد</option>
-                <option>شيك</option>
-                <option>عقد</option>
-                <option>وارد</option>
-                <option>صادر</option>
-                <option>تقرير</option>
-            </select>
-        </div>
-
-        <div>
-            <label>الرقم الداخلي</label>
-            <input id="document-number" placeholder="INV-001">
-        </div>
-
-        <div>
-            <label>العميل أو الجهة</label>
-            <input id="entity-name">
-        </div>
-
-        <div>
-            <label>تاريخ المستند - تلقائي</label>
-            <input id="document-date" type="date" readonly>
-        </div>
-
-        <div>
-            <label>الحالة</label>
-            <select id="document-status">
-                <option>مفتوح</option>
-                <option>قيد المراجعة</option>
-                <option>ساري</option>
-                <option>مغلق</option>
-                <option>ملغي</option>
-            </select>
-        </div>
-
-        <div>
-            <label>القيمة</label>
-            <input id="amount" type="number" step="0.01">
-        </div>
-
-        <div>
-            <label>من / بداية الفترة</label>
-            <input id="period-from">
-        </div>
-
-        <div>
-            <label>إلى / نهاية الفترة</label>
-            <input id="period-to">
-        </div>
-
-        <div class="full-width">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
-        <label style="margin:0;">بنود المستند</label>
-        <button type="button" class="secondary-button" onclick="addItemRow()" style="padding:7px 10px;font-size:.78rem;">+ إضافة بند</button>
-    </div>
-    <div id="items-editor" style="display:flex;flex-direction:column;gap:10px;"></div>
-    <div style="margin-top:12px;padding:12px;background:#eef6ff;border:1px solid #cfe1f5;border-radius:9px;text-align:right;">
-        <span style="color:#64748b;font-size:.75rem;">الإجمالي النهائي المحسوب</span>
-        <strong id="items-total-preview" style="display:block;color:var(--blue);font-size:1.15rem;margin-top:4px;">0.00</strong>
-    </div>
-</div>
-
-        <div class="full-width">
-            <label>رابط المصدر أو المرفق</label>
-            <input id="source-url" type="url">
-        </div>
-
-        <div class="full-width">
-            <label>ملاحظات وشروط</label>
-            <textarea id="notes" placeholder="اكتب كل ملاحظة أو شرط في سطر مستقل...
-مثال:
-1. التوريد خلال 7 أيام
-2. السعر شامل الضريبة"></textarea>
-        </div>
-
-        <div class="full-width">
-            <label>هيدر المستند للطباعة</label>
-            <textarea id="header-text" placeholder="اسم الشركة أو العنوان أو بيانات أعلى المستند"></textarea>
-        </div>
-        <div class="full-width">
-            <label>الخاتمة</label>
-            <textarea id="conclusion-text" placeholder="وتقبلوا فائق الاحترام والتقدير"></textarea>
-        </div>
-        <div class="full-width">
-            <label>فوتر المستند للطباعة</label>
-            <textarea id="footer-text" placeholder="العنوان أو الهاتف أو البريد الإلكتروني أو بيانات أسفل المستند"></textarea>
-        </div>
-    </div>
-
-    <div class="actions">
-        <button class="primary-button" onclick="saveDocument()">
-            حفظ المستند
-        </button>
-
-        <button class="secondary-button" onclick="clearForm()">
-            مسح الخانات
-        </button>
-
-        <span id="form-message" class="message"></span>
-    </div>
-</section>
-
-<!-- الفلاتر -->
-<section class="panel">
-    <h2>البحث والفلترة</h2>
-
-    <div class="form-grid">
-
-        <div class="full-width">
-            <label>بحث</label>
-            <input
-                id="search-text"
-                placeholder="رقم المستند أو الجهة أو الملاحظات">
-        </div>
-
-        <div>
-            <label>نوع المستند</label>
-            <select id="filter-type">
-                <option value="">كل الأنواع</option>
-            </select>
-        </div>
-
-        <div>
-            <label>الحالة</label>
-            <select id="filter-status">
-                <option value="">كل الحالات</option>
-            </select>
-        </div>
-
-        <div>
-            <label>اليوم</label>
-            <select id="filter-day">
-                <option value="">كل الأيام</option>
-            </select>
-        </div>
-
-        <div>
-            <label>الشهر</label>
-            <select id="filter-month">
-                <option value="">كل الشهور</option>
-            </select>
-        </div>
-
-        <div>
-            <label>السنة</label>
-            <select id="filter-year">
-                <option value="">كل السنوات</option>
-            </select>
-        </div>
-
-        <div>
-            <label>بطاقات الصفحة</label>
-            <select id="page-size">
-                <option value="12">12</option>
-                <option value="24">24</option>
-                <option value="48">48</option>
-            </select>
-        </div>
-
-    </div>
-
-    <div class="actions">
-
-        <button class="primary-button" onclick="applyFilters()">
-            تطبيق الفلترة
-        </button>
-
-        <button class="secondary-button" onclick="showAllDocuments()">
-            عرض الكل
-        </button>
-
-        <span id="filter-message" class="message"></span>
-    </div>
-</section>
-
-<div style="display:flex;justify-content:space-between;">
-    <h2 style="color:var(--navy);">
-        المستندات
-    </h2>
-
-    <span id="document-count"></span>
-</div>
-
-<section id="cards" class="cards">
-    <div class="empty">جاري التحميل...</div>
-</section>
-
-<div class="pagination">
-    <button id="previous-button" onclick="changePage(-1)">
-        السابق
-    </button>
-
-    <span id="page-info"></span>
-
-    <button id="next-button" onclick="changePage(1)">
-        التالي
+<main id="main-content-area">
+    <aside class="sidebar">
+        <div class="console-box">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+    <label style="margin:0;">1. القطاع:</label>
+    <button onclick="openDashboard()"
+            style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+        📊 لوحة المؤشرات
     </button>
 </div>
+           <div style="display:flex; align-items:center; gap:5px;">
+    <select id="ind-filter" style="flex:1;">
+        <option value="">اختر القطاع</option>
+    </select>
 
+    <button type="button"
+            onclick="filterSingle('Industry', 'ind-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        ENT
+    </button>
+</div>
+<label>2. الشهر:</label>
+            <div style="display:flex; align-items:center; gap:5px;">
+    <select id="month-filter" style="flex:1;">
+        <option value="">اختر الشهر</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('Month', 'month-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        ENT
+    </button>
+</div>
+<label>3. السنة:</label>
+           <div style="display:flex; align-items:center; gap:5px;">
+    <select id="year-filter" style="flex:1;">
+        <option value="">اختر السنة</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('Year', 'year-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        ENT
+    </button>
+</div>
+<label>4. نوع المستند:</label>
+            <div style="display:flex; align-items:center; gap:5px;">
+    <select id="doc-filter" style="flex:1;">
+        <option value="">اختر نوع المستند</option>
+    </select>
+
+    <button type="button"
+            onclick="filterSingle('DocType', 'doc-filter')"
+            style="background:#238636; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        ENT
+    </button>
+</div>
+<label>ـــــــــــــــــــــ</label>
+            <button class="execute-btn" id="exec-btn">RUN ANALYSIS ></button>
+<div id="members-box" style="display:none; margin-top:20px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+    <label style="margin:0;">الأعضاء:</label>
+    <button onclick="switchToMode('all')" id="btn-mode-all"
+            style="background:#238636; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:0.7rem; cursor:pointer; font-weight:bold; white-space:nowrap;">
+        ALL
+    </button>
+</div>
+    <div id="members-list" style="max-height:330px; overflow-y:auto; border:1px solid var(--accent); border-radius:6px; background:#d1d5db;"></div>
+</div>
+        </div>
+    </aside>
+    <section class="display-area" id="main-view">
+        <div class="loading">// من فضلك الضغط على زر ALL لعرض بطاقات الفرص</div>
+    </section>
 </main>
 
-<!-- نافذة التفاصيل -->
-<dialog id="details-dialog">
-    <div class="modal">
+<section id="entry-section" style="display:none; max-width:800px; margin:20px auto; padding:30px; background:var(--panel); border:2px solid var(--accent); border-radius:15px;">
+    <h2 style="color:var(--gold); border-bottom:1px solid var(--accent); padding-bottom:10px; margin-bottom:25px;">? إضافة سجل جديد</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div>
+    <label>القطاع:</label>
+<select id="in-industry">
+    <option value="">اختر القطاع</option>
+    <option value="الزراعة">الزراعة</option>
+    <option value="الثروة الحيوانية">الثروة الحيوانية</option>
+    <option value="الأغذية والمشروبات">الأغذية والمشروبات</option>
+    <option value="الصناعة">الصناعة</option>
+    <option value="التجارة">التجارة</option>
+    <option value="التجارة الإلكترونية">التجارة الإلكترونية</option>
+    <option value="الخدمات">الخدمات</option>
+    <option value="التكنولوجيا">التكنولوجيا</option>
+    <option value="البرمجيات">البرمجيات</option>
+    <option value="التعليم والتدريب">التعليم والتدريب</option>
+    <option value="الصحة">الصحة</option>
+    <option value="العقارات">العقارات</option>
+    <option value="البناء والتشييد">البناء والتشييد</option>
+    <option value="النقل واللوجستيات">النقل واللوجستيات</option>
+    <option value="السياحة والضيافة">السياحة والضيافة</option>
+    <option value="الطاقة والبيئة">الطاقة والبيئة</option>
+    <option value="الإعلام والتسويق">الإعلام والتسويق</option>
+    <option value="التمويل والخدمات المالية">التمويل والخدمات المالية</option>
+    <option value="الجمال والعناية الشخصية">الجمال والعناية الشخصية</option>
+    <option value="أخرى">أخرى</option>
+</select>
 
-        <div class="modal-header">
-            <h2 id="modal-title"></h2>
+</div>
 
-            <div style="display:flex;gap:8px;align-items:center;">
-                <button class="secondary-button print-button" type="button" onclick="printDetails()">طباعة</button>
-                <button class="close-button" onclick="closeDetails()">إغلاق</button>
-            </div>
-        </div>
+        <div><label>التخصص:</label><input type="text" id="in-niche"></div>
+        <div style="display:none;"><label>التقييم:</label><input type="number" id="id-score"></div>
+        <div><label>الشهر:</label><select id="in-month">
+    <option value="">اختر الشهر</option>
+    <option value="يناير">يناير</option>
+    <option value="فبراير">فبراير</option>
+    <option value="مارس">مارس</option>
+    <option value="أبريل">أبريل</option>
+    <option value="مايو">مايو</option>
+    <option value="يونيو">يونيو</option>
+    <option value="يوليو">يوليو</option>
+    <option value="أغسطس">أغسطس</option>
+    <option value="سبتمبر">سبتمبر</option>
+    <option value="أكتوبر">أكتوبر</option>
+    <option value="نوفمبر">نوفمبر</option>
+    <option value="ديسمبر">ديسمبر</option>
+</select>
+</div>
+        <div style="grid-column:span 2;">
+    <label>الوصف:</label>
 
-        <div id="modal-body"></div>
+    <button type="button"
+            onclick="highlightSelectedText()"
+            style="margin-bottom:8px; background:#d29922; color:white;
+                   border:none; padding:7px 12px; border-radius:6px;
+                   cursor:pointer; font-weight:bold;">
+        تمييز عنوان رئيسي او فرعى ⭐
+    </button>
+
+
+    <textarea id="in-desc" rows="4"
+              placeholder="لتميز عنوان رئيسي او فرعى او تميز رقم بلون ذهبى بارز قم بكتابة الكلمة ثم حددها ثم الضغط على زر تميز عنوان "></textarea>
+</div>
+
+ <div>
+<label>حجم السوق الحالي:</label>
+<select id="in-market">
+    <option value="">اختر التقييم</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+    <option value="35">35</option>
+    <option value="40">40</option>
+    <option value="45">45</option>
+    <option value="50">50</option>
+    <option value="55">55</option>
+    <option value="60">60</option>
+    <option value="65">65</option>
+    <option value="70">70</option>
+    <option value="75">75</option>
+    <option value="80">80</option>
+    <option value="85">85</option>
+    <option value="90">90</option>
+    <option value="95">95</option>
+    <option value="100">100</option>
+</select>
+
+</div>
+<div>
+<label>قوة الطلب الفعلى:</label>
+<select id="in-market-2">
+    <option value="">اختر التقييم</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+    <option value="35">35</option>
+    <option value="40">40</option>
+    <option value="45">45</option>
+    <option value="50">50</option>
+    <option value="55">55</option>
+    <option value="60">60</option>
+    <option value="65">65</option>
+    <option value="70">70</option>
+    <option value="75">75</option>
+    <option value="80">80</option>
+    <option value="85">85</option>
+    <option value="90">90</option>
+    <option value="95">95</option>
+    <option value="100">100</option>
+</select>
+
+</div>
+<div>
+<label>شدة المنافسة:</label>
+<select id="in-comp">
+    <option value=""> اختر عدد المنافسين التقريبي</option>
+    <option value="0">لا يوجد منافسون</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+    <option value="35">35</option>
+    <option value="40">40</option>
+    <option value="45">45</option>
+    <option value="50">50</option>
+    <option value="55">55</option>
+    <option value="60">60</option>
+    <option value="65">65</option>
+    <option value="70">70</option>
+    <option value="75">75</option>
+    <option value="80">80</option>
+    <option value="85">85</option>
+    <option value="90">90</option>
+    <option value="95">95</option>
+    <option value="100">100</option>
+</select>
+
+</div>
+
+<div>
+<label>قوة المنافسين:</label>
+<select id="in-comp-2">
+    <option value="">اختر قوة المنافسة</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+    <option value="35">35</option>
+    <option value="40">40</option>
+    <option value="45">45</option>
+    <option value="50">50</option>
+    <option value="55">55</option>
+    <option value="60">60</option>
+    <option value="65">65</option>
+    <option value="70">70</option>
+    <option value="75">75</option>
+    <option value="80">80</option>
+    <option value="85">85</option>
+    <option value="90">90</option>
+    <option value="95">95</option>
+    <option value="100">100</option>
+</select>
+
+</div>
+<div>
+<label>اشارات النمو الحالية:</label>
+<select id="in-growth">
+    <option value="">اختر تقييم النمو</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+    <option value="35">35</option>
+    <option value="40">40</option>
+    <option value="45">45</option>
+    <option value="50">50</option>
+    <option value="55">55</option>
+    <option value="60">60</option>
+    <option value="65">65</option>
+    <option value="70">70</option>
+    <option value="75">75</option>
+    <option value="80">80</option>
+    <option value="85">85</option>
+    <option value="90">90</option>
+    <option value="95">95</option>
+    <option value="100">100</option>
+</select>
+
+</div>
+
+<div>
+<label>استمرار النمو المتوقع:</label>
+<select id="in-growth-2">
+    <option value="">اختر الاستمرار المتوقع</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+    <option value="35">35</option>
+    <option value="40">40</option>
+    <option value="45">45</option>
+    <option value="50">50</option>
+    <option value="55">55</option>
+    <option value="60">60</option>
+    <option value="65">65</option>
+    <option value="70">70</option>
+    <option value="75">75</option>
+    <option value="80">80</option>
+    <option value="85">85</option>
+    <option value="90">90</option>
+    <option value="95">95</option>
+    <option value="100">100</option>
+</select>
+
+</div>
+        <div><label>رابط المصدر:</label><input type="text" id="in-url"></div>
+<div>
+    <label>ظهور البطاقة:</label>
+    <select id="in-visibility">
+        <option value="public">عامة — تظهر في المعرض</option>
+        <option value="private">خاصة — تظهر بالرابط السري فقط</option>
+    </select>
+</div>
+
     </div>
-</dialog>
+    <button onclick="saveToSupabase()" class="execute-btn" style="margin-top:30px; background:var(--green); color:white;">save</button>
+</section>
 
 <script>
+const SB_URL = 'https://pzekjtpiseplgbbhhzod.supabase.co';
+const SB_KEY = 'sb_publishable_dd_MRF-ea6L-lHcxbtfyUg_exFNdEow';
+const _supabase = supabase.createClient(SB_URL, SB_KEY, {
+  auth: {
+    // 🟢 التعديل الجديد: يحفظ الجلسة في ذاكرة التبويب الحالي فقط
+    storage: window.sessionStorage, 
+    autoRefreshToken: true,
+    persistSession: true, 
+    detectSessionInUrl: true
+  }
+});
+let renderIndex = 0;
+const renderBatch = 1;
 
-/* بيانات مشروع Supabase الجديد فقط */
-const SUPABASE_URL =
-    "https://jhnggomihzdtexiwtwwb.supabase.co";
+let db = [], fullDataStore = [], cache = { google: null, supabase: null };
+let initialInterestCounts = {};
+let offset = 0, batchSize = 200;
 
-const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impobmdnb21paHpkdGV4aXd0d3diIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4OTYwOTMsImV4cCI6MjEwOTQ3MjA5M30.TV0_1-wrXnQJG29HUZiEJQKxJcQdW3AyjITKhSgn0JQ";
-
-
-const db = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
-
-let currentPage = 0;
-let totalDocuments = 0;
-let currentDocuments = [];
-let currentOrganizationId = null;
-let currentOrganizationRole = null;
-let currentCanDelete = false;
-
-let editingDocumentId = null;
-
-
-
-
-const $ = id => document.getElementById(id);
-
-function escapeHtml(value) {
-    return String(value ?? "").replace(
-        /[&<>"']/g,
-        character => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        }[character])
-    );
+// --- تغيير حالة اللمبة ---
+function updateStatusToOnline() {
+    const bulb = document.getElementById('led-bulb');
+    const text = document.getElementById('status-text');
+    bulb.className = 'led-green';
+    text.innerText = 'SYSTEM_ONLINE';
+    text.style.color = '#238636';
+}
+function updateStatusToOffline(msg='SYSTEM_OFFLINE') {
+    const bulb = document.getElementById('led-bulb');
+    const text = document.getElementById('status-text');
+    bulb.className = 'led-red';
+    text.innerText = msg;
+    text.style.color = '#f85149';
 }
 
-function todayDate() {
-    return new Date().toISOString().slice(0, 10);
+// --- فتح/غلق نموذج الإدخال ---
+function openEntryForm() {
+    document.getElementById('main-content-area').style.display = 'none';
+    document.getElementById('entry-section').style.display = 'block';
+document.getElementById('nav-back').style.display = 'block';
+    const btn = document.getElementById('nav-back');
+    btn.disabled = false;
+    btn.style.background = "var(--gold)";
+    btn.style.color = "#d1d5db";
+    btn.style.cursor = "pointer";
+}
+function closeEntryForm() {
+    document.getElementById('entry-section').style.display = 'none';
+document.getElementById('nav-back').style.display = 'none';
+    document.getElementById('main-content-area').style.display = 'flex';
+    const btn = document.getElementById('nav-back');
+    btn.disabled = true;
+    btn.style.background = "#30363d";
+    btn.style.color = "#888";
+    btn.style.cursor = "not-allowed";
 }
 
-$("document-date").value = todayDate();
-function openSignupWindow() {
-    document
-        .getElementById("signup-window")
-        .classList.remove("hidden");
+// --- حفظ البيانات إلى Supabase ---
+async function saveToSupabase() {
+    // 🔴 أضف قبل payload مباشرة
+const { data: userData } = await _supabase.auth.getUser();
 
-    document
-        .getElementById("signup-email")
-        .focus();
-}
+const payload = {
+    Industry: document.getElementById('in-industry').value,
+    Niche: document.getElementById('in-niche').value,
+    // ❌ حذفنا سطر الـ Score تماماً عشان سوباباس هو اللي هيحسبه
+    Month: document.getElementById('in-month').value,
+    Description: document.getElementById('in-desc').value,
+    "Market Size": document.getElementById('in-market').value,
+    Competition: document.getElementById('in-comp').value,
+    "Growth Potential": document.getElementById('in-growth').value,
+Market_Size_2: document.getElementById('in-market-2').value,
+Competition_2: document.getElementById('in-comp-2').value,
+Growth_2: document.getElementById('in-growth-2').value,
+    SourceURL: document.getElementById('in-url').value,
+visibility: document.getElementById('in-visibility').value,
 
-function closeSignupWindow() {
-    document
-        .getElementById("signup-window")
-        .classList.add("hidden");
+    created_at: new Date(),
 
-    document
-        .getElementById("signup-message")
-        .textContent = "";
-}
+    // ✅ السطر الجديد (أهم شيء)
+    user_id: userData.user.id
+};
+    let result;
 
-function openPasswordRecoveryWindow() {
-    document
-        .getElementById("recovery-window")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("recovery-email")
-        .focus();
-}
-
-function closePasswordRecoveryWindow() {
-    document
-        .getElementById("recovery-window")
-        .classList.add("hidden");
-
-    document
-        .getElementById("recovery-message")
-        .textContent = "";
-}
-
-async function signUpUser() {
-    const email =
-        document
-            .getElementById("signup-email")
-            .value
-            .trim();
-
-    const password =
-        document
-            .getElementById("signup-password")
-            .value;
-
-    const confirmation =
-        document
-            .getElementById("signup-password-confirm")
-            .value;
-
-    const message =
-        document.getElementById(
-            "signup-message"
-        );
-
-    if (!email || !password || !confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "اكتب البريد وكلمة المرور وتأكيدها";
-        return;
-    }
-
-    if (password.length < 6) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمة المرور يجب أن تكون 6 أحرف أو أكثر";
-        return;
-    }
-
-    if (password !== confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمتا المرور غير متطابقتين";
-        return;
-    }
-
-    message.style.color = "#a76500";
-    message.textContent =
-        "جاري إنشاء الحساب...";
-
-    const result =
-        await db.auth.signUp({
-            email: email,
-            password: password
-        });
-
-    if (result.error) {
-        console.error(result.error);
-
-        message.style.color = "#b42318";
-        message.textContent =
-            "فشل إنشاء الحساب: " +
-            result.error.message;
-
-        return;
-    }
-
-    message.style.color = "#16845b";
-    message.textContent =
-        "تم إنشاء الحساب. تحقق من بريدك الإلكتروني إذا طلب النظام ذلك.";
-
-    document
-        .getElementById("signup-password")
-        .value = "";
-
-    document
-        .getElementById("signup-password-confirm")
-        .value = "";
-}
-
-async function sendPasswordRecovery() {
-    const email =
-        document
-            .getElementById("recovery-email")
-            .value
-            .trim();
-
-    const message =
-        document.getElementById(
-            "recovery-message"
-        );
-
-    if (!email) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "اكتب بريدك الإلكتروني أولًا";
-        return;
-    }
-
-    message.style.color = "#a76500";
-    message.textContent =
-        "جاري إرسال رابط الاستعادة...";
-
-    const redirectUrl =
-    "https://abdoelsoltan506-jpg.github.io/business-documents/";
-
-
-    const result =
-        await db.auth.resetPasswordForEmail(
-            email,
-            {
-                redirectTo: redirectUrl
-            }
-        );
-
-    if (result.error) {
-        console.error(result.error);
-
-        message.style.color = "#b42318";
-        if (
-    result.error.message &&
-    result.error.message
-        .toLowerCase()
-        .includes("rate limit")
-) {
-    message.style.color = "#b42318";
-    message.textContent =
-        "تم تجاوز حد إرسال الرسائل مؤقتًا. " +
-        "انتظر قليلًا ثم حاول مرة واحدة فقط.";
+if (editingItemId) {
+    result = await _supabase
+        .from('transactions')
+        .update(payload)
+        .eq('id', editingItemId)
+        .select('id, share_token, visibility')
+        .single();
 } else {
-    message.style.color = "#b42318";
-    message.textContent =
-        "فشل إرسال الرابط: " +
-        result.error.message;
+    result = await _supabase
+        .from('transactions')
+        .insert([payload])
+        .select('id, share_token, visibility')
+        .single();
 }
 
+const { data: savedCard, error } = result;
 
-        return;
-    }
-
-    message.style.color = "#16845b";
-    message.textContent =
-        "تم إرسال رابط استعادة كلمة المرور إلى بريدك.";
-}
-function openPasswordUpdateWindow() {
-    const windowElement =
-        document.getElementById(
-            "password-update-window"
-        );
-
-    if (windowElement) {
-        windowElement.classList.remove("hidden");
-
-        document
-            .getElementById("new-password")
-            .focus();
-    }
+if (error) {
+    alert("فشل الحفظ: " + error.message);
+    return;
 }
 
-async function updateUserPassword() {
-    const password =
-        document
-            .getElementById("new-password")
-            .value;
-
-    const confirmation =
-        document
-            .getElementById("new-password-confirm")
-            .value;
-
-    const message =
-        document.getElementById(
-            "password-update-message"
-        );
-
-    if (!password || !confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "اكتب كلمة المرور وأكدها";
-        return;
-    }
-
-    if (password.length < 6) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمة المرور يجب أن تكون 6 أحرف أو أكثر";
-        return;
-    }
-
-    if (password !== confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمتا المرور غير متطابقتين";
-        return;
-    }
-
-    message.style.color = "#a76500";
-    message.textContent =
-        "جاري حفظ كلمة المرور...";
-
-    const result =
-        await db.auth.updateUser({
-            password: password
-        });
-
-    if (result.error) {
-        console.error(result.error);
-
-        message.style.color = "#b42318";
-        message.textContent =
-            "فشل تغيير كلمة المرور: " +
-            result.error.message;
-
-        return;
-    }
-
-    message.style.color = "#16845b";
-    message.textContent =
-        "تم تغيير كلمة المرور بنجاح. يمكنك الدخول بها الآن.";
-
-    document
-        .getElementById("new-password")
-        .value = "";
-
-    document
-        .getElementById("new-password-confirm")
-        .value = "";
-}
-db.auth.onAuthStateChange(
-    function (event) {
-        if (event === "PASSWORD_RECOVERY") {
-            openPasswordUpdateWindow();
-        }
-    }
-);
-function openPasswordUpdateWindow() {
-    const updateWindow =
-        document.getElementById(
-            "password-update-window"
-        );
-
-    if (!updateWindow) {
-        return;
-    }
-
-    updateWindow.classList.remove("hidden");
-
-    const passwordInput =
-        document.getElementById("new-password");
-
-    if (passwordInput) {
-        passwordInput.focus();
-    }
-}
-
-async function updateUserPassword() {
-    const password =
-        document
-            .getElementById("new-password")
-            .value;
-
-    const confirmation =
-        document
-            .getElementById("new-password-confirm")
-            .value;
-
-    const message =
-        document.getElementById(
-            "password-update-message"
-        );
-
-    if (!password || !confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "اكتب كلمة المرور وأكدها";
-        return;
-    }
-
-    if (password.length < 6) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمة المرور يجب أن تكون 6 أحرف أو أكثر";
-        return;
-    }
-
-    if (password !== confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمتا المرور غير متطابقتين";
-        return;
-    }
-
-    message.style.color = "#a76500";
-    message.textContent =
-        "جاري حفظ كلمة المرور...";
-
-    const result =
-        await db.auth.updateUser({
-            password: password
-        });
-
-    if (result.error) {
-        console.error(result.error);
-
-        message.style.color = "#b42318";
-        message.textContent =
-            "فشل تغيير كلمة المرور: " +
-            result.error.message;
-
-        return;
-    }
-
-    message.style.color = "#16845b";
-    message.textContent =
-        "تم تغيير كلمة المرور بنجاح.";
-
-    document
-        .getElementById("new-password")
-        .value = "";
-
-    document
-        .getElementById("new-password-confirm")
-        .value = "";
-}
-function openPasswordUpdateWindow() {
-    const updateWindow =
-        document.getElementById(
-            "password-update-window"
-        );
-
-    if (!updateWindow) {
-        return;
-    }
-
-    updateWindow.classList.remove("hidden");
-
-    const passwordInput =
-        document.getElementById("new-password");
-
-    if (passwordInput) {
-        passwordInput.focus();
-    }
-}
-
-async function updateUserPassword() {
-    const password =
-        document
-            .getElementById("new-password")
-            .value;
-
-    const confirmation =
-        document
-            .getElementById("new-password-confirm")
-            .value;
-
-    const message =
-        document.getElementById(
-            "password-update-message"
-        );
-
-    if (!password || !confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "اكتب كلمة المرور وأكدها";
-        return;
-    }
-
-    if (password.length < 6) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمة المرور يجب أن تكون 6 أحرف أو أكثر";
-        return;
-    }
-
-    if (password !== confirmation) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "كلمتا المرور غير متطابقتين";
-        return;
-    }
-
-    message.style.color = "#a76500";
-    message.textContent =
-        "جاري حفظ كلمة المرور...";
-
-    const result =
-        await db.auth.updateUser({
-            password: password
-        });
-
-    if (result.error) {
-        console.error(result.error);
-
-        message.style.color = "#b42318";
-        message.textContent =
-            "فشل تغيير كلمة المرور: " +
-            result.error.message;
-
-        return;
-    }
-
-    message.style.color = "#16845b";
-    message.textContent =
-        "تم تغيير كلمة المرور بنجاح.";
-
-    document
-        .getElementById("new-password")
-        .value = "";
-
-    document
-        .getElementById("new-password-confirm")
-        .value = "";
-}
-
-function calculateItemsTotal() {
-    let total = 0;
-    document.querySelectorAll(".item-editor-row").forEach(row => {
-        const quantity = Number(row.querySelector(".item-quantity-input").value || 0);
-        const price = Number(row.querySelector(".item-price-input").value || 0);
-        const lineTotal = quantity * price;
-        row.querySelector(".item-line-total").textContent = lineTotal.toLocaleString("ar-EG", {minimumFractionDigits: 2});
-        total += lineTotal;
-    });
-    const amount = $("amount");
-    if (amount) amount.value = total.toFixed(2);
-    const preview = $("items-total-preview");
-    if (preview) preview.textContent = total.toLocaleString("ar-EG", {minimumFractionDigits: 2});
-    return total;
-}
-function createItemRow(item = {}) {
-    const row = document.createElement("div");
-    row.className = "item-editor-row";
-    row.style.cssText = "display:grid;grid-template-columns:minmax(190px,2fr) minmax(80px,.8fr) minmax(100px,1fr) minmax(110px,1fr) auto;gap:8px;align-items:end;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;";
-
-    row.innerHTML = `
-        <div>
-            <label>البيان أو الصنف</label>
-            <textarea
-                class="item-name-input"
-                rows="3"
-                placeholder="اكتب البيان كاملًا هنا..."
-            ></textarea>
-        </div>
-
-        <div>
-            <label>الكمية</label>
-            <input
-                type="number"
-                min="0"
-                step="any"
-                class="item-quantity-input"
-                value="${item.quantity ?? 1}"
-            >
-        </div>
-
-        <div>
-            <label>سعر الوحدة</label>
-            <input
-                type="number"
-                min="0"
-                step="0.01"
-                class="item-price-input"
-                value="${item.price ?? 0}"
-            >
-        </div>
-
-        <div>
-            <label>إجمالي البند</label>
-            <strong
-                class="item-line-total"
-                style="display:block;padding:10px;color:var(--blue);background:#eef6ff;border-radius:8px;min-height:20px;"
-            >
-                0.00
-            </strong>
-        </div>
-
-        <button
-            type="button"
-            class="secondary-button remove-item-button"
-            style="padding:10px;color:#b42318;background:#fbe9e7;"
-        >
-            حذف
-        </button>
-    `;
-
-    row.querySelector(".item-name-input").value =
-        item.name || "";
-
-    row.querySelector(
-        ".item-quantity-input"
-    ).addEventListener(
-        "input",
-        calculateItemsTotal
-    );
-
-    row.querySelector(
-        ".item-price-input"
-    ).addEventListener(
-        "input",
-        calculateItemsTotal
-    );
-
-    row.querySelector(
-        ".remove-item-button"
-    ).addEventListener(
-        "click",
-        () => {
-            const rows = document.querySelectorAll(
-                ".item-editor-row"
-            );
-
-            if (rows.length === 1) {
-                row.querySelector(
-                    ".item-name-input"
-                ).value = "";
-
-                row.querySelector(
-                    ".item-quantity-input"
-                ).value = 1;
-
-                row.querySelector(
-                    ".item-price-input"
-                ).value = 0;
-            } else {
-                row.remove();
-            }
-
-            calculateItemsTotal();
-        }
-    );
-
-    return row;
-}
-function addItemRow(item = {}) { const editor = $("items-editor"); if (!editor) return; editor.appendChild(createItemRow(item)); calculateItemsTotal(); }
-function setItemsEditor(items) { const editor = $("items-editor"); if (!editor) return; editor.innerHTML = ""; if (!Array.isArray(items) || items.length === 0) addItemRow(); else items.forEach(item => editor.appendChild(createItemRow(item))); calculateItemsTotal(); }
-function getItemsFromEditor() {
-    const items = [];
-    document.querySelectorAll(".item-editor-row").forEach(row => {
-        const name = row.querySelector(".item-name-input").value.trim();
-        const quantity = Number(row.querySelector(".item-quantity-input").value || 0);
-        const price = Number(row.querySelector(".item-price-input").value || 0);
-        if (!name && quantity === 0 && price === 0) return;
-        if (!name) throw new Error("اكتب بيان كل بند أو احذف السطر الفارغ");
-        items.push({name, quantity, price, total: quantity * price});
-    });
-    return items;
-}
-
-async function loginUser() {
-    const emailInput =
-        document.getElementById("login-email");
-
-    const passwordInput =
-        document.getElementById("login-password");
-
-    const message =
-        document.getElementById("login-message");
-
-    const email =
-        emailInput.value.trim();
-
-    const password =
-        passwordInput.value;
-
-    if (!email || !password) {
-        message.style.color = "#b42318";
-        message.textContent =
-            "اكتب البريد الإلكتروني وكلمة المرور";
-        return;
-    }
-
-    message.style.color = "#a76500";
-    message.textContent =
-        "جاري التحقق من البيانات...";
-
-    const result =
-        await db.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
-    if (result.error) {
-        console.error(result.error);
-
-        message.style.color = "#b42318";
-        message.textContent =
-            "فشل الدخول: " + result.error.message;
-
-        return;
-    }
-
-    message.style.color = "#16845b";
-    message.textContent =
-        "تم الدخول بنجاح";
-
-    document
-        .getElementById("login-screen")
-        .classList.add("hidden");
-
-    document
-        .getElementById("logout-button")
-        .classList.remove("hidden");
+if (savedCard?.visibility === 'private' && savedCard.share_token) {
+    const privateLink =
+        `${window.location.origin}${window.location.pathname}?share=${savedCard.share_token}`;
 
     try {
-    const organizationId =
-        await loadMyOrganization();
-if (organizationId) {
-    await loadMyOrganizationName();
-    await loadMyOrganizationRole();
-    await loadMyDeletePermission();
-}
-
-
-
-    if (!organizationId) {
-        document
-            .getElementById("company-window")
-            .classList.remove("hidden");
-
-        message.style.color = "#a76500";
-        message.textContent =
-            "أنشئ شركتك للمتابعة";
-
-        return;
-    }
-
-    await loadFilters();
-    await loadDocuments();
-
-} catch (error) {
-    message.style.color = "var(--red)";
-    message.textContent =
-        error.message;
-
-    await db.auth.signOut();
-
-    document
-        .getElementById("login-screen")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("logout-button")
-        .classList.add("hidden");
-}
-
-
-}
-async function loadMyOrganization() {
-
-    const result = await db.rpc(
-        "get_my_organization_id"
-    );
-
-    if (result.error) {
-        console.error(result.error);
-
-        currentOrganizationId = null;
-
-        throw new Error(
-            "تعذر معرفة الشركة المرتبط بها المستخدم"
+        await navigator.clipboard.writeText(privateLink);
+        alert(
+            "تم الحفظ.\n\nتم نسخ الرابط السري إلى الحافظة.\nأرسله فقط إلى الشخص الذي تريد."
+        );
+    } catch {
+        prompt(
+            "انسخ هذا الرابط السري وأرسله للشخص المطلوب فقط:",
+            privateLink
         );
     }
-
-    currentOrganizationId = result.data;
-
-    if (!currentOrganizationId) {
-    return null;
-}
-
-
-    return currentOrganizationId;
-}
-async function loadMyOrganizationName() {
-    const result =
-        await db.rpc(
-            "get_my_organization_name"
-        );
-
-    if (result.error) {
-        console.error(result.error);
-        return;
-    }
-
-    const companyName =
-        document.getElementById(
-            "company-name"
-        );
-
-    if (companyName && result.data) {
-        companyName.textContent =
-            "الشركة: " + result.data;
-    }
-}
-async function loadMyOrganizationRole() {
-    const result =
-        await db.rpc(
-            "get_my_organization_role"
-        );
-
-    if (result.error) {
-        console.error(result.error);
-        return null;
-    }
-
-    currentOrganizationRole =
-        result.data || null;
-
-    const roleElement =
-        document.getElementById(
-            "company-role"
-        );
-
-    if (roleElement) {
-        const roleNames = {
-            owner: "مالك الشركة",
-            admin: "مدير",
-            member: "موظف"
-        };
-
-        roleElement.textContent =
-            currentOrganizationRole
-                ? "الصلاحية: " +
-                  (
-                    roleNames[
-                        currentOrganizationRole
-                    ] ||
-                    currentOrganizationRole
-                  )
-                : "";
-    }
-
-    return currentOrganizationRole;
-}
-async function loadMyDeletePermission() {
-    const result =
-        await db.rpc(
-            "get_my_delete_permission"
-        );
-
-    if (result.error) {
-        console.error(result.error);
-        currentCanDelete = false;
-        return false;
-    }
-
-    currentCanDelete =
-    result.data === true ||
-    result.data === "true";
-
-
-    return currentCanDelete;
-}
-
-/* تسجيل الخروج */
-async function logoutUser() {
-    await db.auth.signOut();
-    location.reload();
-}
-
-/* تجهيز استعلام الفلترة */
-function buildQuery() {
-    let query = db
-        .from("business_documents")
-        .select("*", { count: "exact" })
-        .order("document_date", { ascending: false })
-        .order("created_at", { ascending: false });
-
-    const search =
-        $("search-text").value.trim();
-
-    const type =
-        $("filter-type").value;
-
-    const status =
-        $("filter-status").value;
-
-    const day =
-        $("filter-day").value;
-
-    const month =
-        $("filter-month").value;
-
-    const year =
-        $("filter-year").value;
-
-    if (search) {
-        query = query.or(
-            `document_number.ilike.%${search}%,
-             entity_name.ilike.%${search}%,
-             notes.ilike.%${search}%`
-        );
-    }
-
-    if (type) {
-        query = query.eq("document_type", type);
-    }
-
-    if (status) {
-        query = query.eq("status", status);
-    }
-
-    if (day) {
-        query = query.eq("document_day", Number(day));
-    }
-
-    if (month) {
-        query = query.eq("document_month", Number(month));
-    }
-
-    if (year) {
-        query = query.eq("document_year", Number(year));
-    }
-
-    return query;
-}
-
-/* تحميل صفحة واحدة فقط */
-async function loadDocuments() {
-    const pageSize =
-        Number($("page-size").value);
-
-    const start =
-        currentPage * pageSize;
-
-    const end =
-        start + pageSize - 1;
-
-    const result =
-        await buildQuery().range(start, end);
-
-    if (result.error) {
-        $("cards").innerHTML =
-            `<div class="empty">
-                ${escapeHtml(result.error.message)}
-             </div>`;
-        return;
-    }
-
-    currentDocuments =
-        result.data || [];
-
-    totalDocuments =
-        result.count || 0;
-
-    renderCards();
-
-    const totalPages =
-        Math.ceil(totalDocuments / pageSize);
-
-    $("document-count").textContent =
-        `${totalDocuments} مستند إجمالًا`;
-
-    $("page-info").textContent =
-        totalPages
-            ? `صفحة ${currentPage + 1} من ${totalPages}`
-            : "لا توجد نتائج";
-
-    $("previous-button").disabled =
-        currentPage === 0;
-
-    $("next-button").disabled =
-        (currentPage + 1) * pageSize >= totalDocuments;
-}
-
-/* تحميل قيم الفلاتر */
-async function loadFilters() {
-    const result = await db
-        .from("business_documents")
-        .select("document_type,status,document_date")
-        .limit(1000);
-
-    if (result.error) {
-        return;
-    }
-
-    const types = [
-        ...new Set(
-            result.data
-                .map(row => row.document_type)
-                .filter(Boolean)
-        )
-    ].sort();
-
-    const statuses = [
-        ...new Set(
-            result.data
-                .map(row => row.status)
-                .filter(Boolean)
-        )
-    ].sort();
-
-    const years = [
-        ...new Set(
-            result.data
-                .map(row => row.document_date?.slice(0, 4))
-                .filter(Boolean)
-        )
-    ].sort().reverse();
-
-    $("filter-type").innerHTML =
-        `<option value="">كل الأنواع</option>` +
-        types.map(type =>
-            `<option value="${escapeHtml(type)}">
-                ${escapeHtml(type)}
-             </option>`
-        ).join("");
-
-    $("filter-status").innerHTML =
-        `<option value="">كل الحالات</option>` +
-        statuses.map(status =>
-            `<option value="${escapeHtml(status)}">
-                ${escapeHtml(status)}
-             </option>`
-        ).join("");
-
-    $("filter-year").innerHTML =
-        `<option value="">كل السنوات</option>` +
-        years.map(year =>
-            `<option value="${year}">${year}</option>`
-        ).join("");
-
-    $("filter-month").innerHTML =
-        `<option value="">كل الشهور</option>` +
-        Array.from({ length: 12 }, (_, index) => {
-            const month =
-                String(index + 1).padStart(2, "0");
-
-            return `<option value="${month}">
-                        ${month}
-                    </option>`;
-        }).join("");
-
-    $("filter-day").innerHTML =
-        `<option value="">كل الأيام</option>` +
-        Array.from({ length: 31 }, (_, index) => {
-            const day =
-                String(index + 1).padStart(2, "0");
-
-            return `<option value="${day}">
-                        ${day}
-                    </option>`;
-        }).join("");
-
-    $("connection").textContent =
-        "متصل بالمستندات";
-}
-async function deleteDocument(documentId) {
-  const normalizedRole =
-    String(
-        currentOrganizationRole || ""
-    )
-        .trim()
-        .toLowerCase();
-
-const normalizedCanDelete =
-    currentCanDelete === true ||
-    String(currentCanDelete)
-        .trim()
-        .toLowerCase() === "true";
-
-if (
-    normalizedRole !== "owner" &&
-    normalizedRole !== "admin" &&
-    !normalizedCanDelete
-) {
+} else {
     alert(
-        "ليس لديك صلاحية حذف المستندات"
+        editingItemId
+            ? "تم تعديل البطاقة بنجاح!"
+            : "تم حفظ البطاقة العامة بنجاح!"
+    );
+}
+
+editingItemId = null;
+cache.supabase = null;
+closeEntryForm();
+toggleDataSource('supabase');
+
+}
+function highlightSelectedText() {
+    const textarea = document.getElementById('in-desc');
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    if (start === end) {
+        alert('حدد الجملة أو الكلمة أولًا ثم اضغط  زر تميز عنوان او عنصر او رقم');
+        return;
+    }
+
+    const selectedText = textarea.value.substring(start, end);
+
+    const highlightedText =
+        '**' + selectedText + '**';
+
+    textarea.value =
+        textarea.value.substring(0, start) +
+        highlightedText +
+        textarea.value.substring(end);
+
+    textarea.focus();
+
+    textarea.selectionStart = start;
+    textarea.selectionEnd = start + highlightedText.length;
+}
+function numberSelectedLines() {
+    const textarea = document.getElementById('in-desc');
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    if (start === end) {
+        alert('حدد الأسطر التي تريد ترقيمها أولًا');
+        return;
+    }
+
+    const selectedText = textarea.value.substring(start, end);
+    const lines = selectedText.split('\n');
+
+    const numberedText = lines
+        .filter(line => line.trim() !== '')
+        .map((line, index) => `${index + 1}. ${line}`)
+        .join('\n');
+
+    textarea.value =
+        textarea.value.substring(0, start) +
+        numberedText +
+        textarea.value.substring(end);
+
+    textarea.focus();
+
+    textarea.selectionStart = start;
+    textarea.selectionEnd = start + numberedText.length;
+}
+
+// --- جلب البيانات (Supabase) ---
+async function fetchSupabaseBatch(
+    start = 0,
+    limit = batchSize,
+    ownerId = null
+) {
+    let query = _supabase
+        .from('transactions')
+        .select('*');
+
+    if (ownerId) {
+        query = query.or(
+            `visibility.eq.public,user_id.eq.${ownerId}`
+        );
+    } else {
+        query = query.eq(
+            'visibility',
+            'public'
+        );
+    }
+
+    const { data, error } = await query
+        .order('created_at', {
+            ascending: false
+        })
+        .range(start, start + limit - 1);
+
+    if (error) {
+        console.error(
+            'Supabase read error:',
+            error
+        );
+        throw error;
+    }
+
+    return data || [];
+}
+
+async function loadInitialInterestCounts(items) {
+    initialInterestCounts = {};
+
+    const ids = [
+        ...new Set(
+            items
+                .map(item => Number(item.id || item.ID))
+                .filter(id => Number.isInteger(id) && id > 0)
+        )
+    ];
+
+    if (!ids.length) {
+        return;
+    }
+
+    const { data, error } = await _supabase.rpc(
+        'get_initial_interest_counts',
+        {
+            p_transaction_ids: ids
+        }
     );
 
+    if (error) {
+        console.error('Interest counts error:', error);
+        return;
+    }
+
+    (data || []).forEach(row => {
+        initialInterestCounts[Number(row.transaction_id)] =
+            Number(row.interest_count || 0);
+    });
+}
+
+// --- تبديل المصدر ---
+																
+
+async function toggleDataSource(source) {
+    document.getElementById('nav-entry').style.display =
+    (source === 'supabase' && window.isMember) ? 'block' : 'none';
+
+    updateStatusToOffline('CONNECTING...');
+
+    if (cache[source]) {
+    db = cache[source];
+
+    if (source === 'supabase') {
+        await loadInitialInterestCounts(db);
+    }
+
+    finishLoading();
     return;
 }
 
 
+    try {
+        if (source === 'supabase') {
+            let allData = [], start = 0, batch;
+            do {
+                batch = await fetchSupabaseBatch(
+                              start,
+                              batchSize,
+                             window.currentUserId || null
+                             );
 
-    const record =
-        currentDocuments.find(
-            row => String(row.id) === String(documentId)
-        );
+                allData.push(...batch.filter(i => i && i.Niche));
+                start += batchSize;
+            } while (batch.length === batchSize);
+            db = cache.supabase = allData.reverse();
+
+await loadInitialInterestCounts(db);
+
+finishLoading();
+
+        } else {
+            // رابط الـ Deployment اللي طلعلك من جوجل سكريبت
+            const GOOGLE_SCRIPT_URL = 'h';
+
+            // مناداة البيانات للديسك توب
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(response => response.json())
+                .then(res => {
+                    if (res && res.cards) {
+                        cache.google = res.cards.filter(i => i && i.Niche).reverse();
+                        db = cache.google;
+                        finishLoading();
+                    }
+                })
+                .catch(err => {
+                    console.error("Google Fail:", err);
+                    updateStatusToOffline('GOOGLE_FAIL');
+                });
+        }
+    } catch (err) {
+        updateStatusToOffline('LOAD_FAIL');
+    }
+}
+
+// دالة مساعدة لتنظيف الكود
+function finishLoading() {
+    updateStatusToOnline();
+    setupFilters();
+    updateTickerWithNew();
+    updateTodayCount();
+}
+// --- إعداد القوائم المنسدلة ---
+function setupFilters() {
+    const clean = v => v? v.toString().trim():null;
+    const fill = (id,key) => {
+        const el = document.getElementById(id);
+        el.innerHTML = '<option value="">-- اختر --</option>';
+        const values = [...new Set(db.map(i=>clean(i[key])).filter(Boolean))].sort();
+        values.forEach(v=> el.add(new Option(v,v)));
+    };
+    fill('ind-filter','Industry');
+    fill('month-filter','Month');
+    fill('doc-filter','DocType');
+    fill('year-filter','Year');
+}
+function filterSingle(columnName, selectId) {
+    const value = document.getElementById(selectId).value;
+
+    if (!value) {
+        alert("اختر قيمة أولًا");
+        return;
+    }
+
+    fullDataStore = db.filter(item =>
+        String(item[columnName] ?? '').trim() === String(value).trim()
+    );
+
+    renderIndex = 0;
+
+    const view = document.getElementById('main-view');
+    view.innerHTML = '';
+
+    render();
+}
+
+// --- تشغيل التحليل ---
+async function executeAnalysis(){
+
+    const ind = document.getElementById('ind-filter').value;
+    const mon = document.getElementById('month-filter').value;
+    const yr  = document.getElementById('year-filter').value;
+    const doc = document.getElementById('doc-filter').value;
+
+    if(!ind || !mon || !yr || !doc){
+        alert("يجب اختيار كل القوائم");
+        return;
+    }
+
+    
+const { data, error } = await _supabase
+    .from('transactions')
+    .select('*')
 
     
 
+    .eq('Industry', ind)
+    .eq('Month', mon)
+    .eq('Year', yr)
+    .eq('DocType', doc)
+.eq('visibility', 'public')
+.order('created_at', { ascending:false });
 
-    const documentName =
-        record.document_number ||
-        record.document_type ||
-        "هذا المستند";
-
-    const confirmed =
-        window.confirm(
-            `هل أنت متأكد من حذف ${documentName}؟\n\nلا يمكن التراجع عن الحذف.`
-        );
-
-    if (!confirmed) {
+    if(error){
+        console.error(error);
+        alert("حدث خطأ أثناء جلب البيانات");
         return;
     }
 
-   const result =
-    await db
-        .from("business_documents")
-        .delete()
-        .eq("id", documentId)
-        .eq(
-            "organization_id",
-            currentOrganizationId
-        );
+    fullDataStore = data || [];
 
+    renderIndex = 0;
 
+    const view = document.getElementById('main-view');
+    view.innerHTML = '';
 
-    if (result.error) {
-    console.error(result.error);
-
-    alert(
-        "فشل الحذف: " +
-        result.error.message
-    );
-
-    return;
+    render();
 }
+// --- عرض البيانات ---
+function render() {
+    const view = document.getElementById('main-view');
 
-
-
-alert("تم حذف المستند بنجاح");
-
-    await loadFilters();
-
-    if (
-        currentDocuments.length === 1 &&
-        currentPage > 0
-    ) {
-        currentPage--;
-    }
-
-    await loadDocuments();
-}
-
-/* عرض البطاقات */
-function renderCards() {
-    if (!currentDocuments.length) {
-        $("cards").innerHTML =
-            `<div class="empty">
-                لا توجد مستندات مطابقة.
-             </div>`;
+    // 🛑 1. حماية: إذا كانت البيانات فارغة أساساً
+    if (!fullDataStore || !fullDataStore.length) {
+        view.innerHTML = '<div class="loading" style="text-align:center; padding:40px; color:var(--gold);">لا توجد نتائج للعرض</div>';
         return;
     }
 
-    $("cards").innerHTML =
-        currentDocuments.map(document => {
+    // 🛑 2. حماية: إذا تم عرض كل البطاقات ووصلنا للنهاية، توقف فوراً
+    if (renderIndex >= fullDataStore.length) return;
 
-            const statusClass =
-                document.status === "قيد المراجعة"
-                    ? "status-review"
-                    : document.status === "مغلق" ||
-                      document.status === "ملغي"
-                        ? "status-closed"
-                        : "";
+    // اقتطاع الـ 20 بطاقة التالية
+    const items = fullDataStore.slice(renderIndex, renderIndex + renderBatch);
+    if (!items.length) return;
 
-            const createdTime =
-                document.created_at
-                    ? new Date(
-                        document.created_at
-                      ).toLocaleString("ar-EG")
-                    : "—";
-const updatedTime =
-    document.updated_at
-        ? new Date(
-            document.updated_at
-          ).toLocaleString("ar-EG")
-        : createdTime;
+    const html = items.map(item => {
+        const score = parseFloat(item.Score || 0);
+        const color = score >= 80 ? '#238636' : (score >= 60 ? '#d29922' : '#f85149');
+
+        return `<div class="card" style="border-right-color:${color}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:var(--accent); font-weight:bold;">[ ${item.Industry || 'غير محدد'} ]</span>
+                <div style="text-align:left;">
+                    
+                    <br>
+                    <small style="color:var(--gold); font-weight:bold;">${item.Month || ''}</small>
+                </div>
+            </div>
+<h2 style="font-size:2rem; margin:15px 0;">
+    ${item.Niche || ''}
+</h2>
 
 
-            const itemsCount =
-                Array.isArray(document.items)
-                    ? document.items.length
-                    : 0;
+            <!-- الشريط المدرج (مقسم إلى 10 قطاعات) -->
 
-            return `
-                <article class="card">
-
-                    <div class="card-header">
-                        <div>
-                            <div class="document-type">
-                                ${escapeHtml(
-                                    document.document_type
-                                )}
-                            </div>
-
-                            <div class="document-number">
-                                الرقم:
-                                ${escapeHtml(
-                                    document.document_number || "—"
-                                )}
-                            </div>
-                        </div>
-
-                        <span class="status ${statusClass}">
-                            ${escapeHtml(document.status)}
-                        </span>
-                    </div>
-
-                    <div class="card-data">
-
-                        <div>
-                            <span>الجهة</span>
-                            ${escapeHtml(document.entity_name)}
-                        </div>
-
-                        <div>
-                            <span>تاريخ المستند</span>
-                            ${escapeHtml(document.document_date)}
-                        </div>
-
-                        <div>
-                            <span>وقت التسجيل من Supabase</span>
-                            ${escapeHtml(createdTime)}
-                        </div>
-<div
-    style="
-        grid-column:1 / -1;
-        color:#6b7280;
-        font-size:.68rem;
-        text-align:right;
-    "
->
-    آخر تعديل:
-    ${escapeHtml(updatedTime)}
+<span style="color:${color}; font-size:1.5rem; font-weight:bold;">${score}%</span>
+    <div style="background:#21262d; height:12px; border-radius:6px; overflow:hidden; border:1px solid #30363d;">
+        <div style="width: ${score}%; background: ${color}; height:100%; transition: width 1s;"></div>
+    </div>
+<!-- شريط متصل مع مسطرة ترقيم مئوية -->
+<div style="margin:20px 0;">
+    <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--gold); margin-bottom:5px; font-weight:bold;">
+        <span>0%</span>
+        <span>25%</span>
+        <span>50%</span>
+        <span>75%</span>
+        <span>100%</span>
+    </div>
 </div>
+            <div class="desc-box">
+                ${item.Description
+                    ? item.Description.replace(/\*\*(.*?)\*\*/g,'<span class="big-star">$1</span>').replace(/\n/g,'<br>')
+                    : ''}
+            </div>
 
+            <div class="stats-grid">
+                <div class="stat-item"><span class="stat-label">حجم السوق 1</span>${item['Market Size'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">حجم السوق 2</span>${item['Market_Size_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">المنافسة 1</span>${item.Competition || '-'}</div>
+                <div class="stat-item"><span class="stat-label">المنافسة 2</span>${item['Competition_2'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">النمو 1</span>${item['Growth Potential'] || '-'}</div>
+                <div class="stat-item"><span class="stat-label">النمو 2</span>${item['Growth_2'] || '-'}</div>
+            </div>
 
-                        <div>
-                            <span>القيمة</span>
-                            <b class="amount">
-                                ${
-                                    document.amount == null
-                                        ? "—"
-                                        : Number(
-                                            document.amount
-                                          ).toLocaleString(
-                                            "ar-EG",
-                                            {
-                                                minimumFractionDigits: 2
-                                            }
-                                          )
-                                }
-                            </b>
-                        </div>
-
-                        <div>
-                            <span>عدد البنود</span>
-                            ${itemsCount}
-                        </div>
-
-                    </div>
-
-                    <button
-    class="details-button"
-    onclick="openDetails('${document.id}')">
-    فتح التفاصيل
+            ${item.SourceURL
+                ? `<a href="${item.SourceURL}" target="_blank" style="padding:5px 10px; background:#f85149; color:white; border-radius:4px; font-size:0.7rem; font-weight:bold;">المصدر</a>`
+                : ''}
+<button type="button"
+        onclick="openInitialInterestModal(
+            ${Number(item.id)},
+            '${encodeURIComponent(item.Niche || 'هذه الفكرة')}'
+        )"
+        style="padding:8px 12px;
+               background:#d29922;
+               color:white;
+               border:none;
+               border-radius:4px;
+               font-size:.7rem;
+               font-weight:bold;
+               cursor:pointer;">
+    إرسال اهتمام مبدئي
 </button>
 
-<button
-    type="button"
-    class="edit-document-button"
-    onclick="startEditDocument('${document.id}')"
-    style="
-        width:100%;
-        margin-top:8px;
-        padding:10px;
-        border:0;
-        border-radius:8px;
-        background:#e8f5ef;
-        color:#16845b;
-        cursor:pointer;
-    "
->
-    تعديل المستند
-</button>
+            <div style="display:flex; gap:8px; margin-top:15px; width:100%;">
+    <button onclick="showAnalysis('${encodeURIComponent(JSON.stringify(item))}')"
+            style="flex:2; background:var(--green); color:#991b1b; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
+        🔍 فحص المؤشرات
+    </button>
 
+    ${window.isMember ? `
+        <button onclick="editItem(${item.id || item.ID})"
+                style="flex:1; background:#21262d; color:#b197fc; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
+            ✏️ تعديل
+        </button>
 
+        <button onclick="deleteItem('${item.id}')"
+                style="flex:1; background:#21262d; color:#f85149; border:1px solid #30363d; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Cairo';">
+            🗑️ حذف
+        </button>
+        ` : ''}
+</div>
 
 ${
-    currentOrganizationRole === "owner" ||
-currentOrganizationRole === "admin" ||
-currentCanDelete === true
-
+    item.visibility === 'private' &&
+    item.user_id === window.currentUserId
         ? `
-            <button
-                type="button"
-                class="delete-document-button"
-                onclick="deleteDocument('${document.id}')"
-                style="
-                    width:100%;
-                    margin-top:8px;
+        <div style="margin-top:14px;
                     padding:10px;
-                    border:0;
+                    border:1px solid var(--gold);
                     border-radius:8px;
-                    background:#fbe9e7;
-                    color:#b42318;
-                    cursor:pointer;
-                "
-            >
-                حذف المستند
+                    background:rgba(210,153,34,.10);
+                    text-align:center;">
+
+            <div style="color:var(--gold);
+                        font-weight:bold;
+                        font-size:.85rem;
+                        margin-bottom:8px;">
+                🔒 بطاقة خاصة — لا تظهر للعامة
+            </div>
+
+            <button type="button"
+                    onclick="copyPrivateLink(
+                        '${item.share_token}'
+                    )"
+                    style="width:100%;
+                           padding:9px;
+                           background:var(--gold);
+                           color:#161b22;
+                           border:none;
+                           border-radius:6px;
+                           cursor:pointer;
+                           font-weight:bold;">
+                🔗 نسخ الرابط الخاص
             </button>
-          `
-        : ""
+        </div>
+        `
+        : ''
+}
+<div style="display:flex;
+            justify-content:right;
+            align-items:center;
+            margin-top:14px;
+            padding:9px 12px;
+            color:var(--gold);
+            border:1px solid var(--gold);
+            border-radius:8px;
+            font-size:.8rem;
+            font-weight:bold;
+            background:rgba(210,153,34,.08);">
+    ◎ أشخاص مهتمون مبدئيًا:
+    <span style="margin-right:5px;">
+        ${initialInterestCounts[Number(item.id || item.ID)] || 0}
+    </span>
+</div>`;
+
+}).join('');
+    view.insertAdjacentHTML('beforeend', html);
+    renderIndex += renderBatch; // زيادة العداد للدفعة التالية
+}
+// --- تحديث التيكر ---
+function updateTickerWithNew() {
+    const ticker = document.getElementById('ticker-stream');
+    if(db && db.length>0){
+        const newsUpdates = db.slice(0,20).map(i=>i.New?i.New:'').filter(Boolean).join(' ⚡ ');
+        ticker.innerText = newsUpdates || "SYSTEM_READY: NO_NEW_UPDATES_FOUND";
+    }
 }
 
+// --- زر تبديل العرض ---
+function switchToMode(mode) {
+    const btnAll = document.getElementById('btn-mode-all');
+    const btnToday = document.getElementById('btn-mode-today');
 
+    if(mode==='today'){
+        btnToday.style.background = 'var(--gold)';
+btnToday.style.color = '#d1d5db';
+        btnAll.style.background='#161b22'; btnAll.style.color='#888';
 
-                </article>
-            `;
-        }).join("");
+        const todayISO = new Date().toISOString().split('T')[0];
+
+        // فلترة مباشر على db حسب تاريخ اليوم
+        fullDataStore = db.filter(item => {
+            const d = new Date(item.created_at || item.Date || item.date);
+            if(isNaN(d)) return false;
+            return d.toISOString().split('T')[0] === todayISO;
+        }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+
+        renderIndex = 0;
+        const view = document.getElementById('main-view');
+        view.innerHTML = '';
+        render();
+    } else {
+
+    btnAll.style.background = 'var(--gold)';
+    btnAll.style.color = '#d1d5db';
+
+    btnToday.style.background = '#161b22';
+    btnToday.style.color = '#888';
+
+    fullDataStore = db;
+
+    renderIndex = 0;
+
+    const view = document.getElementById('main-view');
+
+    view.innerHTML = '';
+
+    render();
+   }
 }
-function startEditDocument(documentId) {
-    const record =
-        currentDocuments.find(
-            row => String(row.id) === String(documentId)
-        );
+function updateTodayCount(){
 
-    if (!record) {
+const today = new Date().toISOString().split('T')[0];
+
+const count = db.filter(item => {
+
+const d = new Date(item.created_at || item.Date || item.date);
+
+if(isNaN(d)) return false;
+
+return d.toISOString().split('T')[0] === today;
+
+}).length;
+
+document.getElementById("today-count").innerText = "عمليات اليوم: " + count;
+
+}
+
+// --- ربط زر التحليل ---
+document.getElementById('exec-btn').onclick = executeAnalysis;
+
+// --- دالة تسجيل الدخول ---
+// --- دالة تسجيل الدخول (المعدلة لتعمل فوراً) ---
+async function handleLogin() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    const msg = document.getElementById('login-msg');
+
+    if (!email || !pass) {
+        msg.innerText = "اكتب البيانات من فضلك";
         return;
     }
 
-    editingDocumentId =
-        record.id;
+    msg.innerText = "جاري التحقق...";
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: pass,
+    });
 
-    $("document-type").value =
-        record.document_type || "فاتورة";
+    if (error) {
+        msg.innerText = "خطأ: " + error.message;
+    } else {
+        msg.innerText = "تم الدخول بنجاح! جاري فتح الرادار...";
+        
+        // 🟢 التعديل هنا: ننتظر نص ثانية قبل التحديث لضمان استقرار الدخول
+        setTimeout(() => {
+            window.location.reload();
+        }, 500); 
+    }
+}
+async function handleSignup() {
+    const email =
+        document.getElementById('login-email').value.trim();
 
-    $("document-number").value =
-        record.document_number || "";
+    const pass =
+        document.getElementById('login-pass').value;
 
-    $("entity-name").value =
-        record.entity_name || "";
+    const msg =
+        document.getElementById('login-msg');
 
-    $("document-status").value =
-        record.status || "مفتوح";
+    if (!email || !pass) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'اكتب البريد الإلكتروني وكلمة المرور أولًا.';
+        return;
+    }
 
-    $("amount").value =
-        record.amount ?? "";
+    if (pass.length < 6) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل.';
+        return;
+    }
 
-    $("period-from").value =
-        record.period_from || "";
+    msg.style.color = '#d29922';
+    msg.innerText = 'جاري إنشاء الحساب...';
 
-    $("period-to").value =
-        record.period_to || "";
+    const { error } =
+        await _supabase.auth.signUp({
+            email: email,
+            password: pass,
+            options: {
+                emailRedirectTo:
+                    window.location.origin +
+                    window.location.pathname
+            }
+        });
 
-    $("source-url").value =
-        record.source_url || "";
+    if (error) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'تعذر إنشاء الحساب: ' + error.message;
+        return;
+    }
 
-    $("notes").value =
-        record.notes || "";
+    msg.style.color = '#238636';
+    msg.innerText =
+        'تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد.';
+}
+async function handlePasswordReset() {
+    const email =
+        document.getElementById('login-email').value.trim();
 
-        $("header-text").value = record.header_text || "";
-    $("conclusion-text").value = record.conclusion_text || "";
-    $("footer-text").value = record.footer_text || "";
-    setItemsEditor(Array.isArray(record.items) ? record.items : []);
+    const msg =
+        document.getElementById('login-msg');
 
-    $("form-message").style.color =
-        "var(--orange)";
+    if (!email) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'اكتب بريدك الإلكتروني أولًا.';
+        return;
+    }
 
-    $("form-message").textContent =
-        "تم تحميل المستند للتعديل";
+    msg.style.color = '#d29922';
+    msg.innerText =
+        'جاري إرسال رابط الاستعادة...';
 
-    const inputPanel =
-        document.getElementById(
-            "input-panel"
+    const resetUrl =
+        window.location.origin +
+        window.location.pathname;
+
+    const { error } =
+        await _supabase.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo: resetUrl
+            }
         );
 
-    if (inputPanel) {
-        inputPanel.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
+    if (error) {
+        msg.style.color = '#f85149';
+        msg.innerText =
+            'تعذر إرسال الرابط: ' + error.message;
+        return;
+    }
+
+    msg.style.color = '#238636';
+    msg.innerText =
+        'تم إرسال رابط تغيير كلمة المرور إلى بريدك.';
+}
+
+function openLoginScreen() {
+    document.getElementById('login-screen').style.display = 'flex';
+}
+async function openPasswordSetup() {
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    if (!session) {
+        alert("يجب تسجيل الدخول أولاً حتى نربط كلمة المرور بنفس حسابك.");
+        return;
+    }
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('password-setup-modal').style.display = 'flex';
+}
+
+function closeLoginScreen() {
+    document.getElementById('login-screen').style.display = 'none';
+}
+async function signInWithGoogle() {
+    const { error } = await _supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+           redirectTo: window.location.href
+        }
+    });
+
+    if (error) {
+        alert('تعذر التسجيل عبر Google: ' + error.message);
+    }
+}
+async function openSharedCard(shareToken) {
+    const { data, error } = await _supabase.rpc(
+        'get_shared_transaction',
+        {
+            p_share_token: shareToken
+        }
+    );
+
+    if (error || !data) {
+        document.getElementById('main-view').innerHTML =
+            '<div class="loading">الرابط غير صحيح أو البطاقة لم تعد متاحة.</div>';
+        return;
+    }
+
+    const card = typeof data === 'string'
+        ? JSON.parse(data)
+        : data;
+
+    db = [card];
+    fullDataStore = [card];
+    renderIndex = 0;
+
+    const sidebar = document.querySelector('.sidebar');
+
+    if (sidebar) {
+        sidebar.style.display = 'none';
+    }
+
+    const main = document.getElementById('main-content-area');
+
+    if (main) {
+        main.style.display = 'block';
+    }
+
+    await loadInitialInterestCounts([card]);
+
+    document.getElementById('main-view').innerHTML = '';
+    render();
+}
+async function copyPrivateLink(
+    shareToken
+) {
+    if (!shareToken) {
+        alert('لا يوجد رابط خاص لهذه البطاقة.');
+        return;
+    }
+
+    const privateLink =
+        'https://abdoelsoltan506-jpg.github.io/' +
+        'opportunity-radar/?share=' +
+        shareToken;
+
+    try {
+        await navigator.clipboard.writeText(
+            privateLink
+        );
+
+        alert(
+            'تم نسخ الرابط الخاص بنجاح.'
+        );
+    } catch (error) {
+        prompt(
+            'انسخ الرابط الخاص:',
+            privateLink
+        );
     }
 }
 
+// --- فحص المستخدم عند فتح الصفحة ---
+async function checkUserOnLoad() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    window.currentUserId = 
+           session?.user?.id || null;
 
-/* حفظ مستند */
-async function saveDocument() {
-    const entity =
-    $("entity-name").value.trim();
+    // السماح للجميع برؤية الرادار
+    document.getElementById('login-screen').style.display = 'none';
 
-const message =
-    $("form-message");
+    let profile = null;
 
-if (!currentOrganizationId) {
-    message.style.color = "var(--red)";
-    message.textContent =
-        "لا توجد شركة مرتبطة بهذا المستخدم";
+    if (session) {
+        const { data, error } = await _supabase
+            .from('profiles')
+            .select('subscription_status')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+        if (!error) {
+            profile = data;
+        }
+    }
+
+    // العضو الفعال فقط يعتبر مشتركًا
+    window.isMember =
+        !!session &&
+        profile?.subscription_status === 'active';
+
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+    const entryButton = document.getElementById('nav-entry');
+    const passwordButton = document.getElementById('password-button');
+    const subscribeButton = document.getElementById('subscribe-button');
+    const badge = document.getElementById('user-email-badge');
+
+    if (session) {
+        if (loginButton) loginButton.style.display = 'none';
+        if (subscribeButton) subscribeButton.style.display = 'none';
+        if (logoutButton) logoutButton.style.display = 'block';
+        if (passwordButton) passwordButton.style.display = 'block';
+        if (badge) { badge.innerText = '👤 ' + session.user.email; badge.style.display = 'block'; }
+    } else {
+        if (loginButton) loginButton.style.display = 'block';
+        if (subscribeButton) subscribeButton.style.display = 'block';
+        if (logoutButton) logoutButton.style.display = 'none';
+        if (passwordButton) passwordButton.style.display = 'none';
+        if (badge) badge.style.display = 'none';
+    }
+
+    // إدخال البيانات للمشترك الفعال فقط
+    if (entryButton) {
+        entryButton.style.display = window.isMember ? 'block' : 'none';
+    }
+
+    const sourceSelect = document.getElementById('data-source-select');
+    if (sourceSelect) sourceSelect.value = 'supabase';
+
+    // تحميل البطاقات للجميع
+    const shareToken =
+    new URLSearchParams(window.location.search).get('share');
+
+if (shareToken) {
+    await openSharedCard(shareToken);
     return;
 }
 
+// تحميل البطاقات العامة فقط
+toggleDataSource('supabase');
+loadMembersList();
 
-    if (!entity) {
-        message.style.color = "var(--red)";
-        message.textContent =
-            "اكتب اسم الجهة أولًا";
+}
+async function loadMembersList() {
+    const box = document.getElementById('members-box');
+    const list = document.getElementById('members-list');
+    if (!box || !list) return;
+
+    const { data, error } = await _supabase.rpc('get_members_list');
+    if (error) {
+        console.error('Members list error:', error);
         return;
     }
 
-    let items;
-    try {
-        items = getItemsFromEditor();
-    } catch (error) {
-        message.style.color = "var(--red)";
-        message.textContent = error.message;
-        return;
-    }
-    if (items.length === 0) {
-        message.style.color = "var(--red)";
-        message.textContent = "أضف بندًا واحدًا على الأقل";
-        return;
-    }
-    const amount = items.reduce((sum, item) => sum + item.total, 0);
-    const data = {
-        organization_id:
-    currentOrganizationId,
-        document_type:
-            $("document-type").value,
-
-        document_number:
-            $("document-number").value.trim() || null,
-
-        entity_name:
-            entity,
-
-        status:
-            $("document-status").value,
-
-        amount,
-
-        period_from:
-            $("period-from").value.trim() || null,
-
-        period_to:
-            $("period-to").value.trim() || null,
-
-        source_url:
-            $("source-url").value.trim() || null,
-
-        notes:
-            $("notes").value.trim() || null,
-
-                header_text: $("header-text").value.trim() || null,
-        conclusion_text: $("conclusion-text").value.trim() || null,
-        footer_text: $("footer-text").value.trim() || null,
-        items
-
-        /*
-          لا نرسل document_date هنا.
-          Supabase يضع التاريخ الحالي تلقائيًا.
-          وcreated_at يضع التاريخ والوقت تلقائيًا.
-        */
-    };
-
-    message.style.color = "var(--orange)";
-    message.textContent = "جاري الحفظ...";
-
-    let result;
-
-if (editingDocumentId) {
-    result =
-        await db
-            .from("business_documents")
-            .update(data)
-            .eq("id", editingDocumentId)
-            .eq(
-                "organization_id",
-                currentOrganizationId
-            );
-} else {
-    result =
-        await db
-            .from("business_documents")
-            .insert(data);
-}
-
-
-    if (result.error) {
-        message.style.color = "var(--red)";
-        message.textContent =
-            "فشل الحفظ: " + result.error.message;
-        return;
-    }
-
-    message.textContent =
-    editingDocumentId
-        ? "تم تعديل المستند "
-        : "تم حفظ المستند بنجاح";
-
-
-    editingDocumentId =
-    null;
-
-    clearForm();
-
-    await loadFilters();
-
-    currentPage = 0;
-    await loadDocuments();
-}
-
-/* مسح النموذج */
-function clearForm() {
-    ["document-number", "entity-name", "period-from", "period-to", "source-url", "notes", "header-text", "conclusion-text", "footer-text"].forEach(id => { const field = $(id); if (field) field.value = ""; });
-    $("amount").value = "";
-    $("document-date").value = todayDate();
-    setItemsEditor();
-}
-/* فتح التفاصيل */
-function arabicAmountWords(value) {
-    const number = Number(value || 0);
-    if (!Number.isFinite(number)) return "";
-    const integer = Math.floor(Math.abs(number));
-    const piastres = Math.round((Math.abs(number) - integer) * 100);
-    const ones = ["", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة"];
-    const teens = ["عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"];
-    const tens = ["", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
-    const hundreds = ["", "مائة", "مائتان", "ثلاثمائة", "أربعمائة", "خمسمائة", "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"];
-    function under100(n) { if (n < 10) return ones[n]; if (n < 20) return teens[n-10]; const t=Math.floor(n/10), o=n%10; return o ? `${ones[o]} و${tens[t]}` : tens[t]; }
-    function under1000(n) { if (n < 100) return under100(n); const h=Math.floor(n/100), r=n%100; return r ? `${hundreds[h]} و${under100(r)}` : hundreds[h]; }
-    function group(n) { if (n < 1000) return under1000(n); const out=[]; const m=Math.floor(n/1000000), k=Math.floor((n%1000000)/1000), r=n%1000; if(m) out.push(m===1?"مليون":m===2?"مليونان":`${under1000(m)} مليون`); if(k) out.push(k===1?"ألف":k===2?"ألفان":k>=3 && k<=10?`${under1000(k)} آلاف`:`${under1000(k)} ألفًا`); if(r) out.push(under1000(r)); return out.join(" و"); }
-    let result = integer === 0 ? "صفر" : group(integer);
-    result += " جنيه";
-    if (piastres) result += ` و${group(piastres)} قرشًا`;
-    return `${result} فقط لا غير`;
-}
-function printDetails() { window.print(); }
-
-function openDetails(id) {
-    const record = currentDocuments.find(
-        row => String(row.id) === String(id)
-    );
-
-    if (!record) {
-        return;
-    }
-
-    const items = Array.isArray(record.items)
-        ? record.items
-        : [];
-
-    const formatNumber = value => {
-        const number = Number(value || 0);
-        return Number.isFinite(number)
-            ? number.toLocaleString("ar-EG", {
-                minimumFractionDigits: 2
-            })
-            : "0.00";
-    };
-
-    const finalTotal = items.length
-        ? items.reduce(
-            (sum, item) => {
-                const lineTotal = Number(
-                    item.total ??
-                    Number(item.quantity || 0) *
-                    Number(item.price || 0)
-                );
-                return sum + (Number.isFinite(lineTotal) ? lineTotal : 0);
-            },
-            0
-        )
-        : Number(record.amount || 0);
-
-    const amountWords = arabicAmountWords(finalTotal);
-
-    $("modal-title").textContent =
-        `${record.document_type || "مستند"} — ${
-            record.document_number || "بدون رقم"
-        }`;
-
-    $("modal-body").innerHTML = `
-        ${record.header_text ? `<div class="print-header">${escapeHtml(record.header_text)}</div>` : ""}
-        <section
-            style="
-                padding:14px;
-                background:#f8fafc;
-                border:1px solid var(--line);
-                border-radius:10px;
-            "
-        >
-            <h3 style="margin:0 0 12px;color:var(--navy);">
-                البيانات الأساسية
-            </h3>
-
-            <div class="details">
-                <div>
-                    <span>نوع المستند</span>
-                    ${escapeHtml(record.document_type || "—")}
-                </div>
-                <div>
-                    <span>الحالة</span>
-                    ${escapeHtml(record.status || "—")}
-                </div>
-                <div>
-                    <span>رقم المستند</span>
-                    ${escapeHtml(record.document_number || "—")}
-                </div>
-                <div>
-                    <span>الجهة</span>
-                    ${escapeHtml(record.entity_name || "—")}
-                </div>
-                <div>
-                    <span>تاريخ المستند</span>
-                    ${escapeHtml(record.document_date || "—")}
-                </div>
-                <div>
-                    <span>تاريخ التسجيل</span>
-                    ${record.created_at
-                        ? escapeHtml(new Date(record.created_at).toLocaleString("ar-EG"))
-                        : "—"}
-                </div>
-            </div>
-        </section>
-
-        <section style="margin-top:16px;">
-            <h3 style="margin:0 0 10px;color:var(--navy);">
-                البنود
-            </h3>
-
-            ${items.length
-                ? `
-                    <div class="details-items-wrap">
-                        <table class="details-items-table">
-                            <thead>
-                                <tr>
-                                    <th class="item-index">م</th>
-                                    <th>البيان أو الصنف</th>
-                                    <th>الكمية</th>
-                                    <th>سعر الوحدة</th>
-                                    <th>إجمالي البند</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${items.map((item, index) => {
-                                    const lineTotal = Number(
-                                        item.total ??
-                                        Number(item.quantity || 0) *
-                                        Number(item.price || 0)
-                                    );
-
-                                    return `
-                                        <tr>
-                                            <td class="item-index">
-                                                ${index + 1}
-                                            </td>
-                                            <td>
-                                                ${escapeHtml(item.name || "—")}
-                                            </td>
-                                            <td class="item-quantity">
-                                                ${escapeHtml(item.quantity ?? 0)}
-                                            </td>
-                                            <td class="item-price">
-                                                ${formatNumber(item.price)}
-                                            </td>
-                                            <td class="item-total">
-                                                ${formatNumber(lineTotal)}
-                                            </td>
-                                        </tr>
-                                    `;
-                                }).join("")}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="details-total-box">
-                        <span>الإجمالي النهائي</span>
-                        <strong>${formatNumber(finalTotal)}</strong>
-                    </div>
-                    <div class="amount-words-box">
-                        <span>المبلغ بالحروف</span>
-                        <strong>${escapeHtml(amountWords)}</strong>
-                    </div>
-                `
-                : `
-                    <div class="empty" style="padding:20px;">
-                        لا توجد بنود مسجلة.
-                    </div>
-                `
-            }
-        </section>
-
-        <section
-            style="
-                margin-top:16px;
-                padding:15px;
-                background:#fff;
-                border:1px solid var(--line);
-                border-radius:10px;
-            "
-        >
-            <h3 style="margin:0 0 12px;color:var(--navy);">
-                بيانات إضافية
-            </h3>
-
-            <div class="details">
-                <div>
-                    <span>الفترة</span>
-                    ${escapeHtml([
-                        record.period_from,
-                        record.period_to
-                    ].filter(Boolean).join(" — ") || "—")}
-                </div>
-                <div>
-                    <span>المصدر</span>
-                    ${record.source_url
-                        ? `<a href="${escapeHtml(record.source_url)}" target="_blank" rel="noopener noreferrer">فتح الرابط</a>`
-                        : "—"}
-                </div>
-            </div>
-
-            <div style="margin-top:14px;padding:12px;background:#f8fafc;border-radius:8px;">
-                <span>ملاحظات وشروط</span>
-                <p style="margin:8px 0 0;white-space:pre-line;line-height:1.8;">
-                    ${escapeHtml(record.notes || "لا توجد ملاحظات أو شروط")}
-                </p>
-            </div>
-        </section>
-        ${record.conclusion_text ? `<div class="print-conclusion">${escapeHtml(record.conclusion_text)}</div>` : ""}
-        ${record.footer_text ? `<div class="print-footer">${escapeHtml(record.footer_text)}</div>` : ""}
-    `;
-
-    $("details-dialog").showModal();
-}
-
-function closeDetails() {
-    $("details-dialog").close();
-}
-
-/* تطبيق الفلاتر */
-function applyFilters() {
-    currentPage = 0;
-
-    $("filter-message").textContent =
-        "تم تطبيق الفلترة";
-
-    loadDocuments();
-}
-
-/* عرض كل المستندات مع بقاء التقسيم */
-function showAllDocuments() {
-    $("search-text").value = "";
-    $("filter-type").value = "";
-    $("filter-status").value = "";
-    $("filter-day").value = "";
-    $("filter-month").value = "";
-    $("filter-year").value = "";
-
-    currentPage = 0;
-
-    $("filter-message").textContent =
-        "تم عرض كل المستندات";
-
-    loadDocuments();
-}
-
-/* تغيير الصفحة */
-function changePage(number) {
-    currentPage =
-        Math.max(0, currentPage + number);
-
-    loadDocuments();
-}
-
-/* تفعيل البحث وتغيير حجم الصفحة */
-$("search-text").addEventListener(
-    "input",
-    () => {
-        currentPage = 0;
-        loadDocuments();
-    }
-);
-
-$("page-size").addEventListener(
-    "change",
-    () => {
-    currentPage = 0;
-    loadDocuments();
-}
-);
-
-/* بدء النظام */
-async function startApplication() {
-    const session =
-        await db.auth.getSession();
-
-    if (!session.data.session) {
-        $("connection").textContent =
-            "يجب تسجيل الدخول";
-
-        return;
-    }
-
-    $("login-screen")
-        .classList.add("hidden");
-
-    $("logout-button")
-        .classList.remove("hidden");
-
-    try {
-        const organizationId =
-    await loadMyOrganization();
-
-if (organizationId) {
-    await loadMyOrganizationName();
-    await loadMyOrganizationRole();
-    await loadMyDeletePermission();
-
-    await loadFilters();
-    await loadDocuments();
-}
-else {
-    document
-        .getElementById("company-window")
-        .classList.remove("hidden");
-}
-
-
-    } catch (error) {
-        console.error(error);
-
-        $("connection").textContent =
-            error.message;
-
-        await db.auth.signOut();
-
-        $("login-screen")
-            .classList.remove("hidden");
-
-        $("logout-button")
-            .classList.add("hidden");
-    }
-}
-const createCompanyButton =
-    document.getElementById(
-        "create-company-button"
-    );
-
-const companyWindow =
-    document.getElementById(
-        "company-window"
-    );
-
-const closeCompanyButton =
-    document.getElementById(
-        "close-company-button"
-    );
-
-if (createCompanyButton) {
-    createCompanyButton.addEventListener(
-        "click",
-        function () {
-            companyWindow.classList.remove(
-                "hidden"
-            );
-
-            document
-                .getElementById(
-                    "new-company-name"
-                )
-                .focus();
-        }
-    );
-}
-
-if (closeCompanyButton) {
-    closeCompanyButton.addEventListener(
-        "click",
-        function () {
-            companyWindow.classList.add(
-                "hidden"
-            );
-        }
-    );
-}
-const saveCompanyButton =
-    document.getElementById(
-        "save-company-button"
-    );
-
-if (saveCompanyButton) {
-    saveCompanyButton.addEventListener(
-        "click",
-        async function () {
-            const nameInput =
-                document.getElementById(
-                    "new-company-name"
-                );
-
-            const message =
-                document.getElementById(
-                    "company-window-message"
-                );
-
-            const name =
-                nameInput.value.trim();
-
-            if (name.length < 2) {
-                message.style.color =
-                    "#b42318";
-
-                message.textContent =
-                    "اكتب اسم شركة صحيح";
-
-                nameInput.focus();
-
-                return;
-            }
-
-            saveCompanyButton.disabled =
-                true;
-
-            message.style.color =
-                "#a76500";
-
-            message.textContent =
-                "جاري إنشاء الشركة...";
-
-            const result =
-                await db.rpc(
-                    "create_my_organization",
-                    {
-                        p_name: name
-                    }
-                );
-
-            saveCompanyButton.disabled =
-                false;
-
-            if (result.error) {
-                console.error(result.error);
-
-                message.style.color =
-                    "#b42318";
-
-                message.textContent =
-                    result.error.message;
-
-                return;
-            }
-
-            currentOrganizationId =
-                result.data;
-await loadMyOrganizationName();
-await loadMyOrganizationRole();
-
-document.getElementById(
-    "company-name"
-).textContent =
-    "الشركة: " + name;
-
-
-            message.style.color =
-                "#16845b";
-
-            message.textContent =
-                "تم إنشاء الشركة بنجاح";
-
-            document.getElementById(
-                "connection"
-            ).textContent =
-                "متصل بالشركة: " + name;
-
-            setTimeout(
-                async function () {
-                    companyWindow.classList.add(
-                        "hidden"
-                    );
-
-                    nameInput.value = "";
-                    message.textContent = "";
-
-                    await loadFilters();
-                    await loadDocuments();
-                },
-                700
-            );
-        }
-    );
-}
-async function loadOrganizationMembers() {
-    const list =
-        document.getElementById(
-            "employees-list"
-        );
-
-    if (!list) {
-        return;
-    }
-
-    list.innerHTML =
-        "جاري تحميل الموظفين...";
-
-    const result =
-        await db.rpc(
-            "list_my_organization_members"
-        );
-
-    if (result.error) {
-        console.error(result.error);
-
-        list.innerHTML =
-            `<div style="color:#b42318;">
-                فشل تحميل قائمة الموظفين
-             </div>`;
-
-        return;
-    }
-
-    if (
-        !result.data ||
-        result.data.length === 0
-    ) {
-        list.innerHTML =
-            `<div style="color:#6b7280;">
-                لا يوجد أعضاء في الشركة.
-             </div>`;
-
-        return;
-    }
-
-    list.innerHTML =
-        result.data.map(member => `
-            <div
-                style="
-                    padding:10px 0;
-                    border-bottom:1px solid #e5e7eb;
-                    display:flex;
-                    justify-content:space-between;
-                    gap:10px;
-                    font-size:.85rem;
-                "
-            >
-                <span>
-                    ${escapeHtml(
-                        member.member_email
-                    )}
-                </span>
-
-                
-    <div style="text-align:left;">
-    <b style="color:#17324d;">
-        ${
-            member.member_role === "owner"
-                ? "مالك الشركة"
-                : member.member_role === "admin"
-                    ? "مدير"
-                    : "موظف"
-        }
-    </b>
-
-    ${
-        member.member_role === "member"
-            ? `
-                <label
-                    style="
-                        display:block;
-                        margin-top:6px;
-                        font-size:.72rem;
-                        color:#6b7280;
-                        cursor:pointer;
-                    "
-                >
-                    <input
-                        type="checkbox"
-                        class="member-delete-permission"
-                        data-member-id="${member.member_user_id}"
-                        ${
-                            member.member_can_delete
-                                ? "checked"
-                                : ""
-                        }
-                    >
-                    السماح بالحذف
-                </label>
-              `
-            : ""
-    }
-</div>
-
-
-    ${
-        member.member_role === "member"
-            ? `
-                <label
-                    style="
-                        display:block;
-                        margin-top:6px;
-                        font-size:.72rem;
-                        color:#6b7280;
-                        cursor:pointer;
-                    "
-                >
-                    <input
-                        type="checkbox"
-                        class="member-delete-permission"
-                        data-member-id="${member.member_user_id}"
-                        ${
-                            member.member_can_delete
-
-                                ? "checked"
-                                : ""
-                        }
-                    >
-                    السماح بالحذف
-                </label>
-              `
-            : ""
-    }
-</div>
-
-            </div>
-        `).join("");
-document
-    .querySelectorAll(
-        ".member-delete-permission"
-    )
-    .forEach(function (checkbox) {
-        checkbox.addEventListener(
-            "change",
-            async function () {
-                const memberId =
-                    checkbox.dataset.memberId;
-
-                const newValue =
-                    checkbox.checked;
-
-                checkbox.disabled =
-                    true;
-
-                const result =
-                    await db.rpc(
-                        "set_member_delete_permission",
-                        {
-                            p_member_user_id:
-                                memberId,
-                            p_can_delete:
-                                newValue
-                        }
-                    );
-
-                checkbox.disabled =
-                    false;
-
-                if (result.error) {
-                    console.error(
-                        result.error
-                    );
-
-                    checkbox.checked =
-                        !newValue;
-
-                    alert(
-                        "فشل تغيير صلاحية الحذف: " +
-                        result.error.message
-                    );
-
-                    return;
-                }
-
-                alert(
-                    newValue
-                        ? "تم منح الموظف صلاحية الحذف"
-                        : "تم إلغاء صلاحية الحذف"
-                );
-            }
-        );
+    list.innerHTML = '';
+    (data || []).forEach((m, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = (i + 1) + '. ' + m.email;
+        btn.style.cssText = 'display:block; width:100%; text-align:right; padding:8px 10px; border:none; border-bottom:1px solid #aaa; background:transparent; color:#991b1b; cursor:pointer; font-size:0.8rem; font-family:Cairo;';
+        btn.onclick = () => filterByMember(m.user_id);
+        list.appendChild(btn);
     });
 
+    box.style.display = (data && data.length) ? 'block' : 'none';
 }
 
-const manageEmployeesButton =
-    document.getElementById(
-        "manage-employees-button"
-    );
+function filterByMember(userId) {
+    fullDataStore = db.filter(item => item.user_id === userId);
+    renderIndex = 0;
+    const view = document.getElementById('main-view');
+    view.innerHTML = '';
+    render();
+}
+async function handleLogout() {
+    await _supabase.auth.signOut();
+    window.location.reload(); // لإعادة تحميل الصفحة واجبار النظام على طلب تسجيل الدخول
+}
 
-const employeesWindow =
-    document.getElementById(
-        "employees-window"
-    );
+// تشغيل النظام
+checkUserOnLoad();
+// دالة فتح النافذة وعرض التحليل
+let myChart = null; // تأمين لمنع تداخل الرسومات
 
-const closeEmployeesButton =
-    document.getElementById(
-        "close-employees-button"
-    );
+function showAnalysis(itemData) {
+    const item = JSON.parse(decodeURIComponent(itemData));
+    const score = parseFloat(item.Score || 0);
+    const rotation = (score / 100) * 180 - 90;
 
-if (manageEmployeesButton) {
-    manageEmployeesButton.addEventListener(
-    "click",
-    async function () {
+    // تحديث العداد
+    document.getElementById('modal-title').innerText = item.Niche;
+    document.getElementById('modal-score').innerText = score + "%";
+    document.getElementById('modal-needle').style.transform = `rotate(${rotation}deg)`;
+    
+    // تفاصيل النصوص السفلية
+// ✅ الكود المصحح (استبدل السطر أعلاه بهذا):
+document.getElementById('modal-details').innerHTML = `
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--accent)">حجم السوق 1</small><br>${item['Market Size'] || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--accent)">حجم السوق 2</small><br>${item['Market_Size_2'] || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:#f85149">المنافسة 1</small><br>${item.Competition || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:#f85149">المنافسة 2</small><br>${item.Competition_2 || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--green)">النمو 1</small><br>${item['Growth Potential'] || '-'}
+    </div>
+    <div style="background:#d1d5db; padding:8px; border-radius:5px; border:1px solid #333;">
+        <small style="color:var(--green)">النمو 2</small><br>${item.Growth_2 || '-'}
+    </div>
+`;
 
-            if (
-                currentOrganizationRole !== "owner" &&
-                currentOrganizationRole !== "admin"
-            ) {
-                alert(
-                    "ليس لديك صلاحية إدارة الموظفين"
-                );
+    // 🟢 منطق الرسم البياني المحترم (Chart.js)
+    // 🟢 الرسم البياني المكدّس (المقسم إلى جزئين)
+// 🟢 4. رسم بياني بـ 6 أعمدة متجاورة (مجموعتان لكل محور)
+    if (myChart) { myChart.destroy(); }
+    const ctx = document.getElementById('opportunityChart').getContext('2d');
 
-                return;
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['السوق', 'المنافسة', 'النمو'],
+            datasets: [
+                {
+                    label: 'المؤشر الأول (1)',
+                    data: [
+                        parseFloat
+(item['Market Size']) || 0, 
+                        parseFloat
+(item.Competition) || 0, 
+                        parseFloat
+(item['Growth Potential']) || 0
+                    ],
+                    backgroundColor: ['#58a6ff', '#f85149', '#238636'], // الألوان الأساسية
+                    borderRadius: 4
+                },
+                {
+                    label: 'المؤشر الثاني (2)',
+                    data: [
+                        parseFloat
+(item.Market_Size_2) || 0, 
+                        parseFloat
+(item.Competition_2) || 0, 
+                        parseFloat
+(item.Growth_2) || 0
+                    ],
+                    backgroundColor: ['#1f6beb', '#da3633', '#2ea043'], // درجات أغمق/مختلفة للـ 2
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { 
+                    stacked: false, // 👈 التكديس ملغي لكي تظهر الأعمدة جنب بعضها
+                    ticks: { color: '#991b1b', font: { family: 'Cairo' } } 
+                },
+                y: { 
+                    stacked: false, // 👈 التكديس ملغي
+                    beginAtZero: true, 
+                    max: 100,
+                    ticks: { color: '#666' } 
+                }
             }
+        }
+    });
 
-            employeesWindow.classList.remove(
-                "hidden"
-            );
-await loadOrganizationMembers();
+    document.getElementById('analysis-modal').style.display = 'flex';
+}
+function openDashboard() {
 
+    if (!db || db.length === 0) {
+        alert("لا توجد بيانات");
+        return;
+    }
+
+    const industryMap = {};
+
+    db.forEach(item => {
+        const ind = item.Industry || "Unknown";
+        const score = parseFloat(item.Score || 0);
+
+        if (!industryMap[ind]) {
+            industryMap[ind] = { total: 0, count: 0 };
+        }
+
+        industryMap[ind].total += score;
+        industryMap[ind].count += 1;
+    });
+
+    let bestIndustry = "";
+    let worstIndustry = "";
+    let bestAvg = -Infinity;
+    let worstAvg = Infinity;
+
+    Object.keys(industryMap).forEach(ind => {
+        const avg = industryMap[ind].total / industryMap[ind].count;
+
+        if (avg > bestAvg) {
+            bestAvg = avg;
+            bestIndustry = ind;
+        }
+
+        if (avg < worstAvg) {
+            worstAvg = avg;
+            worstIndustry = ind;
+        }
+    });
+
+    const avgScore = db.reduce((s,i)=>s+(parseFloat(i.Score)||0),0) / db.length;
+
+    document.getElementById("main-view").innerHTML = `
+        <div class="card">
+            <h2>📊 Dashboard Mode</h2>
+
+            <div class="stats-grid" style="margin-top:20px;">
+                <div class="stat-item">
+                    <span class="stat-label">أفضل قطاع</span>
+                    ${bestIndustry}
+                </div>
+
+                <div class="stat-item">
+                    <span class="stat-label">أضعف قطاع</span>
+                    ${worstIndustry}
+                </div>
+
+                <div class="stat-item">
+                    <span class="stat-label">متوسط السوق</span>
+                    ${avgScore.toFixed(1)}%
+                </div>
+            </div>
+
+            <button onclick="backToSystem()" style="margin-top:20px; background:#238636; color:white; padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
+    العودة للنظام 🏠
+</button>
+        </div>
+    `;
+}
+// دالة إغلاق النافذة
+function closeAnalysis() {
+    document.getElementById('analysis-modal').style.display = 'none';
+}
+function backToSystem() {
+    if (!db || db.length === 0) {
+        alert("لا توجد بيانات لإعادة العرض");
+        return;
+    }
+
+    fullDataStore = db;   // 🔥 إعادة ربط البيانات الأساسية
+    renderIndex = 0;
+
+    document.getElementById("main-view").innerHTML = "";
+    render();
+}
+// --- التمرير اللانهائي (Infinite Scroll) ---
+window.addEventListener('scroll', () => {
+    if (typeof renderIndex !== 'undefined' && typeof fullDataStore !== 'undefined') {
+        if (renderIndex >= fullDataStore.length) return;
+
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const threshold = document.documentElement.offsetHeight - 300;
+
+        if (scrollPosition >= threshold) {
+            if (typeof render === 'function') render();
+            else if (typeof renderNextBatch === 'function') renderNextBatch();
+        }
+    }
+});
+
+// --- 1. دالة الحذف المباشر (الشغالة) ---
+async function deleteItem(id) {
+    const confirmDelete = confirm("هل أنت متأكد من حذف هذه الفرصة نهائياً؟");
+    if (!confirmDelete) return;
+
+    try {
+        const numericId = parseInt(id, 10);
+
+        const { error } = await _supabase
+            .from('transactions')
+            .delete()
+            .eq('id', numericId);
+
+        if (error) throw error;
+
+        alert("تم الحذف بنجاح من قاعدة البيانات! 🗑️");
+        
+        if (typeof db !== 'undefined') db = db.filter(item => item.id != id);
+        if (typeof fullDataStore !== 'undefined') fullDataStore = fullDataStore.filter(item => item.id != id);
+        
+        if (typeof render === 'function') {
+            render();
+        } else if (typeof backToSystem === 'function') {
+            backToSystem();
+        } else {
+            location.reload(); 
+        }
+
+    } catch (err) {
+        alert("حدث خطأ أثناء الحذف: " + err.message);
+    }
+}
+
+// --- 2. دالة التعديل والحفظ ---
+let editingItemId = null;
+
+function editItem(id) {
+    const numericId = parseInt(id, 10);
+    const dataStore = (typeof db !== 'undefined' && db.length > 0) ? db : (typeof fullDataStore !== 'undefined' ? fullDataStore : []);
+    const currentItem = dataStore.find(item => (item.id || item.ID) == numericId);
+    
+    if (!currentItem) {
+        alert("لم يتم العثور على بيانات هذه الفرصة!");
+        return;
+    }
+
+    editingItemId = numericId;
+
+    const setVal = (elemId, val) => {
+        const el = document.getElementById(elemId);
+        if (el) el.value = val || '';
+    };
+
+    setVal('in-industry', currentItem.Industry);
+    setVal('in-niche', currentItem.Niche);
+    setVal('in-month', currentItem.Month);
+    setVal('in-desc', currentItem.Description);
+    setVal('in-market', currentItem["Market Size"]);
+setVal('in-market-2', currentItem.Market_Size_2);
+
+setVal('in-comp', currentItem.Competition);
+setVal('in-comp-2', currentItem.Competition_2);
+
+setVal('in-growth', currentItem["Growth Potential"]);
+setVal('in-growth-2', currentItem.Growth_2);
+
+setVal('in-url', currentItem.SourceURL);
+
+    setVal('in-url', currentItem.SourceURL);
+
+    if (typeof openEntryForm === 'function') openEntryForm();
+}
+
+async function saveItem(event) {
+    if (event && event.preventDefault) event.preventDefault();
+
+    try {
+        const { data: userData } = await _supabase.auth.getUser();
+        const userId = userData?.user?.id || null;
+
+        const getVal = (elemId) => {
+            const el = document.getElementById(elemId);
+            return el ? el.value : '';
+        };
+
+        const payload = {
+            Industry: getVal('in-industry'),
+            Niche: getVal('in-niche'),
+            Month: getVal('in-month'),
+            Description: getVal('in-desc'),
+            "Market Size": getVal('in-market'),
+            Competition: getVal('in-comp'),
+            "Growth Potential": getVal('in-growth'),
+            SourceURL: getVal('in-url'),
+            user_id: userId
+        };
+
+        let result;
+
+        if (editingItemId) {
+            result = await _supabase
+                .from('transactions')
+                .update(payload)
+                .eq('id', editingItemId);
+        } else {
+            payload.created_at = new Date().toISOString();
+            result = await _supabase
+                .from('transactions')
+                .insert([payload]);
+        }
+
+        if (result.error) throw result.error;
+
+        alert(editingItemId ? "تم تعديل البيانات بنجاح! ✏️" : "تم الحفظ بنجاح! 💾");
+
+        editingItemId = null;
+        if (typeof cache !== 'undefined') cache.supabase = null;
+        if (typeof closeEntryForm === 'function') closeEntryForm();
+        if (typeof render === 'function') render();
+        else if (typeof backToSystem === 'function') backToSystem();
+
+    } catch (err) {
+        alert("فشل الحفظ: " + err.message);
+    }
+}
+	function closePasswordSetup() {
+    document.getElementById('password-setup-modal').style.display = 'none';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+    document.getElementById('password-setup-msg').innerText = '';
+}
+async function saveNewPassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const msg = document.getElementById('password-setup-msg');
+
+    if (!newPassword || !confirmPassword) {
+        msg.innerText = "اكتب كلمة المرور وأعد تأكيدها";
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        msg.innerText = "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل";
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        msg.innerText = "كلمتا المرور غير متطابقتين";
+        return;
+    }
+
+    msg.style.color = "#d29922";
+    msg.innerText = "جاري حفظ كلمة المرور...";
+
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    if (!session) {
+        msg.style.color = "#f85149";
+        msg.innerText =
+    "افتح رابط التحقق من بريدك الإلكتروني أولًا";
+
+        return;
+    }
+
+    const { error } = await _supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) {
+        msg.style.color = "#f85149";
+        msg.innerText = "تعذر حفظ كلمة المرور: " + error.message;
+        return;
+    }
+
+    msg.style.color = "#238636";
+    msg.innerText = "تم حفظ كلمة المرور لهذا الحساب بنجاح";
+
+    setTimeout(() => {
+        document.getElementById('password-setup-modal').style.display = 'none';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-password').value = '';
+        document.getElementById('password-setup-msg').innerText = '';
+    }, 1500);
+}
+function getInitialInterestToken() {
+    let token = localStorage.getItem(
+        'radar_initial_interest_visitor_token'
+    );
+
+    if (!token) {
+        token =
+            (crypto.randomUUID
+                ? crypto.randomUUID()
+                : Math.random().toString(36).slice(2)) +
+            '-' +
+            Date.now().toString(36);
+
+        localStorage.setItem(
+            'radar_initial_interest_visitor_token',
+            token
+        );
+    }
+
+    return token;
+}
+
+function countInitialInterestWords(text) {
+    const clean = text.trim();
+
+    if (!clean) {
+        return 0;
+    }
+
+    return clean.split(/\s+/).length;
+}
+
+function validateInitialInterest() {
+    const text = document.getElementById(
+        'initial-interest-text'
+    );
+
+    const gmail = document.getElementById(
+        'initial-interest-gmail'
+    );
+
+    const whatsapp = document.getElementById(
+        'initial-interest-whatsapp'
+    );
+
+    const counter = document.getElementById(
+        'initial-interest-counter'
+    );
+
+    const button = document.getElementById(
+        'initial-interest-submit'
+    );
+
+    const textCount =
+        countInitialInterestWords(text.value);
+
+    const hasContact =
+        gmail.value.trim() !== '' ||
+        whatsapp.value.trim() !== '';
+
+    const valid =
+        textCount >= 1 &&
+        textCount <= 20 &&
+        hasContact;
+
+    counter.innerText =
+        `${textCount} / 20 كلمة`;
+
+    counter.style.color =
+        textCount > 20 ? '#f85149' : 'var(--gold)';
+
+    button.disabled = !valid;
+    button.style.background =
+        valid ? 'var(--green)' : '#777';
+
+    button.style.cursor =
+        valid ? 'pointer' : 'not-allowed';
+}
+
+
+async function openInitialInterestModal(
+    transactionId,
+    encodedNiche
+) {
+    document.getElementById(
+        'initial-interest-transaction-id'
+    ).value = transactionId;
+
+    document.getElementById(
+        'initial-interest-niche'
+    ).innerText =
+        'الفكرة: ' + decodeURIComponent(encodedNiche);
+
+    document.getElementById(
+        'initial-interest-text'
+    ).value = '';
+
+    document.getElementById(
+        'initial-interest-gmail'
+    ).value = '';
+
+    document.getElementById(
+        'initial-interest-whatsapp'
+    ).value = '';
+
+    const token = getInitialInterestToken();
+
+    const { data, error } = await _supabase.rpc(
+        'get_initial_interest',
+        {
+            p_transaction_id: Number(transactionId),
+            p_visitor_token: token
         }
     );
-}
 
-if (closeEmployeesButton) {
-    closeEmployeesButton.addEventListener(
-        "click",
-        function () {
-            employeesWindow.classList.add(
-                "hidden"
-            );
-        }
-    );
-}
-const addEmployeeButton =
+        if (!error && data && data.length > 0) {
+        document.getElementById(
+            'initial-interest-text'
+        ).value = data[0].interest_text || '';
+
+        document.getElementById(
+            'initial-interest-gmail'
+        ).value = data[0].gmail || '';
+
+        document.getElementById(
+            'initial-interest-whatsapp'
+        ).value = data[0].whatsapp || '';
+    }
+
+    const result =
+        document.getElementById(
+            'initial-interest-result'
+        );
+
+    if (result) {
+        result.innerText = '';
+        result.style.color = '';
+    }
+
+    validateInitialInterest();
+
     document.getElementById(
-        "add-employee-button"
-    );
-
-if (addEmployeeButton) {
-    addEmployeeButton.addEventListener(
-        "click",
-        async function () {
-            const emailInput =
-                document.getElementById(
-                    "employee-email"
-                );
-
-            const roleInput =
-                document.getElementById(
-                    "employee-role"
-                );
-
-            const message =
-                document.getElementById(
-                    "employees-window-message"
-                );
-
-            const email =
-                emailInput.value.trim();
-
-            const role =
-                roleInput.value;
-
-            if (
-                currentOrganizationRole !== "owner" &&
-                currentOrganizationRole !== "admin"
-            ) {
-                message.style.color =
-                    "#b42318";
-
-                message.textContent =
-                    "ليس لديك صلاحية إضافة موظفين";
-
-                return;
-            }
-
-            if (!email) {
-                message.style.color =
-                    "#b42318";
-
-                message.textContent =
-                    "اكتب البريد الإلكتروني للموظف";
-
-                emailInput.focus();
-
-                return;
-            }
-
-            addEmployeeButton.disabled =
-                true;
-
-            message.style.color =
-                "#a76500";
-
-            message.textContent =
-                "جاري إضافة الموظف...";
-
-            const result =
-                await db.rpc(
-                    "add_existing_employee",
-                    {
-                        p_email: email,
-                        p_role: role
-                    }
-                );
-
-            addEmployeeButton.disabled =
-                false;
-
-            if (result.error) {
-                console.error(result.error);
-
-                message.style.color =
-                    "#b42318";
-
-                message.textContent =
-                    result.error.message;
-
-                return;
-            }
-
-            message.style.color =
-                "#16845b";
-
-            message.textContent =
-                "تمت إضافة الموظف بنجاح";
-
-            emailInput.value = "";
-            roleInput.value = "member";
-await loadOrganizationMembers();
-
-        }
-    );
+        'initial-interest-modal'
+    ).style.display = 'flex';
 }
 
-setItemsEditor();
-startApplication();
+
+function closeInitialInterestModal() {
+    document.getElementById(
+        'initial-interest-modal'
+    ).style.display = 'none';
+}
+
+async function submitInitialInterest() {
+    const result =
+        document.getElementById(
+            'initial-interest-result'
+        );
+
+    const transactionId = Number(
+        document.getElementById(
+            'initial-interest-transaction-id'
+        ).value
+    );
+
+    const text = document.getElementById(
+        'initial-interest-text'
+    ).value.trim();
+
+    const gmail = document.getElementById(
+        'initial-interest-gmail'
+    ).value.trim();
+
+    const whatsapp = document.getElementById(
+        'initial-interest-whatsapp'
+    ).value.trim();
+
+    const wordCount =
+        countInitialInterestWords(text);
+
+    if (!transactionId) {
+        result.style.color = '#f85149';
+        result.innerText = 'لم يتم تحديد البطاقة.';
+        return;
+    }
+
+    if (wordCount < 1 || wordCount > 20) {
+        result.style.color = '#f85149';
+        result.innerText =
+            'اكتب من كلمة واحدة إلى 20 كلمة كحد أقصى.';
+        return;
+    }
+
+    if (!gmail && !whatsapp) {
+        result.style.color = '#f85149';
+        result.innerText =
+            'أدخل Gmail أو رقم واتساب واحدًا على الأقل.';
+        return;
+    }
+
+    const button = document.getElementById(
+        'initial-interest-submit'
+    );
+
+    button.disabled = true;
+    button.innerText = 'جارٍ الحفظ...';
+    result.innerText = '';
+
+    const { error } = await _supabase.rpc(
+        'save_initial_interest',
+        {
+            p_transaction_id: transactionId,
+            p_visitor_token: getInitialInterestToken(),
+            p_interest_text: text,
+            p_gmail: gmail || null,
+            p_whatsapp: whatsapp || null
+        }
+    );
+
+    if (error) {
+        console.error('Initial interest error:', error);
+
+        result.style.color = '#f85149';
+        result.innerText =
+            'لم يتم تسجيل الاهتمام. حاول مرة أخرى.';
+
+        button.disabled = false;
+        button.innerText = 'إرسال اهتمام مبدئي';
+        validateInitialInterest();
+        return;
+    }
+
+    result.style.color = '#238636';
+    result.innerText =
+        'تم تسجيل اهتمامك بنجاح.';
+
+    button.innerText = 'تم التسجيل';
+
+    setTimeout(() => {
+        closeInitialInterestModal();
+
+        button.innerText =
+            'إرسال اهتمام مبدئي';
+
+        result.innerText = '';
+
+        validateInitialInterest();
+    }, 2500);
+}
+
 
 </script>
-
 </body>
 </html>
